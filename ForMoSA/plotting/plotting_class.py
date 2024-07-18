@@ -817,7 +817,7 @@ class PlottingForMoSA():
         ax1.set_xticks([])
         # Labels
         if norm != 'yes': 
-            ax1.set_ylabel(r'Flux (ADU)')
+            ax1.set_ylabel(r'Flux (W m-2 µm-1)')
         else:
             ax1.set_ylabel(r'Normalised flux (W m-2 µm-1)')
             
