@@ -1,14 +1,15 @@
 from __future__ import print_function, division
 import numpy as np
-import os
+import os,sys
 import xarray as xr
 from scipy.interpolate import interp1d
+
+sys.path.insert(0, os.path.abspath('../'))
 
 from adapt.extraction_functions import extract_observation
 from adapt.adapt_grid import adapt_grid
 from main_utilities import diag_mat
 import glob
-# import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -22,7 +23,7 @@ def launch_adapt(global_params, justobs='no'):
     Returns:
         None
 
-    Author: Simon Petrus / Adapted: Matthieu Ravet, Paulina Palma-Bifani and Allan Denis
+    Author: Simon Petrus, Matthieu Ravet, Paulina Palma-Bifani and Allan Denis
     """
 
     # Get back the grid information from the config file

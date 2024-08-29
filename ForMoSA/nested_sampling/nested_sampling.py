@@ -1,18 +1,17 @@
 import numpy as np
-import os
+import os, sys
 import glob
 import nestle
 import time
 import xarray as xr
 import pickle
 
+sys.path.insert(0, os.path.abspath('../'))
+
 from nested_sampling.nested_modif_spec import modif_spec
 from nested_sampling.nested_prior_function import uniform_prior, gaussian_prior
 from nested_sampling.nested_logL_functions import *
 from main_utilities import diag_mat
-import matplotlib.pyplot as plt
-
-c = 299792.458 # Speed of light in km/s
 
 
 def import_obsmod(global_params):
@@ -23,7 +22,7 @@ def import_obsmod(global_params):
         global_params  (object): Class containing every input from the .ini file.
         
     Returns:
-        main_file (list(array)): return a list of lists with the wavelengths, flux, errors, covariance matrix,
+        - main_file (list(array)): Return a list of lists with the wavelengths, flux, errors, covariance matrix,
                                 transmission, star flux, systematics and the grids for both spectroscopic and photometric data. 
 
     Authors: Simon Petrus, Matthieu Ravet and Allan Denis
@@ -76,6 +75,7 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
     """
     Function that calculates the logarithm of the likelihood. 
     The evaluation depends on the choice of likelihood.
+    (If this function is used on the plotting module, it returns the outputs of the modif_spec function)
     
     Args:
         theta           (list): Parameter values randomly picked by the nested sampling
@@ -85,8 +85,7 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
         for_plot         (str): Default is 'no'. When this function is called from the plotting functions module, we use 'yes'
         
     Returns:
-        FINAL_logL     (float): Final evaluated loglikelihood for both spectra and photometry. 
-        (If this function is used on the plotting module, it returns the outputs of the modif_spec function)
+        - FINAL_logL     (float): Final evaluated loglikelihood for both spectra and photometry. 
 
     Authors: Simon Petrus, Matthieu Ravet and Allan Denis
     """
@@ -301,9 +300,9 @@ def prior_transform(theta, theta_index, lim_param_grid, global_params):
         global_params (object): Class containing every input from the .ini file.
         
     Returns:
-        prior           (list): List containing all the prior information
+        - prior           (list): List containing all the prior information
         
-    Author: Simon Petrus
+    Author: Simon Petrus, Matthieu Ravet, Allan Denis
     """
     prior = []
     if global_params.par1 != 'NA':
@@ -752,46 +751,46 @@ def launch_nested_sampling(global_params):
             print('%15s : %.3f +- %.3f' % (name, col.mean(), col.std()))
         print('\n')
 
-    if global_params.ns_algo == 'ultranest':
-        import ultranest, ultranest.stepsampler
+    # if global_params.ns_algo == 'ultranest':
+    #     import ultranest, ultranest.stepsampler
 
-        tmpstot1 = time.time()
+    #     tmpstot1 = time.time()
         
-        loglike_gp = lambda theta: loglike(theta, theta_index, global_params)
+    #     loglike_gp = lambda theta: loglike(theta, theta_index, global_params)
 
-        prior_transform_gp = lambda theta: prior_transform(theta, theta_index, lim_param_grid, global_params)
+    #     prior_transform_gp = lambda theta: prior_transform(theta, theta_index, lim_param_grid, global_params)
 
-        sampler = ultranest.ReactiveNestedSampler(theta_index,loglike=loglike_gp, transform=prior_transform_gp,
-                                                  wrapped_params=[False, False, False, False])#,
-                                                #log_dir=global_params.result_path, resume=True)
-        #result = sampler.run(min_num_live_points=100, max_ncalls=100000)
+    #     sampler = ultranest.ReactiveNestedSampler(theta_index,loglike=loglike_gp, transform=prior_transform_gp,
+    #                                               wrapped_params=[False, False, False, False])#,
+    #                                             #log_dir=global_params.result_path, resume=True)
+    #     #result = sampler.run(min_num_live_points=100, max_ncalls=100000)
 
-        # have to choose the number of steps the slice sampler should take
-        # after first results, this should be increased and checked for consistency.
-        nsteps = 2 * len(theta_index)
-        # create step sampler:
-        sampler.stepsampler = ultranest.stepsampler.SliceSampler(nsteps=nsteps,
-                                                                 generate_direction=ultranest.stepsampler.generate_mixture_random_direction,
-                                                                 # adaptive_nsteps=False,
-                                                                 # max_nsteps=40
-                                                                 )
-        sampler.print_results()
-        #sampler.plot_corner()
+    #     # have to choose the number of steps the slice sampler should take
+    #     # after first results, this should be increased and checked for consistency.
+    #     nsteps = 2 * len(theta_index)
+    #     # create step sampler:
+    #     sampler.stepsampler = ultranest.stepsampler.SliceSampler(nsteps=nsteps,
+    #                                                              generate_direction=ultranest.stepsampler.generate_mixture_random_direction,
+    #                                                              # adaptive_nsteps=False,
+    #                                                              # max_nsteps=40
+    #                                                              )
+    #     sampler.print_results()
+    #     #sampler.plot_corner()
 
-        tmpstot2 = time.time()-tmpstot1
-        print(' ')
-        print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-        print('-> Ultranest  ')
-        print(' ')
-        print('The code spent ' + str(tmpstot2) + ' sec to run.')
-        print(result.summary())
-        print('\n')
+    #     tmpstot2 = time.time()-tmpstot1
+    #     print(' ')
+    #     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
+    #     print('-> Ultranest  ')
+    #     print(' ')
+    #     print('The code spent ' + str(tmpstot2) + ' sec to run.')
+    #     print(result.summary())
+    #     print('\n')
     
-    if global_params.ns_algo == 'dynesty':
-        from dynesty import NestedSampler
+    # if global_params.ns_algo == 'dynesty':
+    #     from dynesty import NestedSampler
 
-        # initialize our nested sampler
-        #sampler = NestedSampler(loglike, ptform, ndim)
+    #     initialize our nested sampler
+    #     sampler = NestedSampler(loglike, ptform, ndim)
 
     result_reformat = {"samples": samples,
                        "weights": weights,

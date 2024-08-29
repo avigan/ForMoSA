@@ -5,7 +5,6 @@ from scipy.ndimage import gaussian_filter
 from scipy.interpolate import interp1d
 from spectres import spectres
 import os
-import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -16,7 +15,9 @@ def decoupe(second):
     Args:
         second (float): number of second
     Returns:
-        hour, minute, second (float, float, float): hours-minutes-seconds format
+        - float     : hours
+        - float     : minutes
+        - float     : seconds
 
     Author: Simon Petrus
     """
@@ -39,7 +40,7 @@ def find_nearest(array, value):
         array (array): Array to explore
         value (float): Desire value
     Returns:
-        idx     (int): Indice of the closest values from the desire value
+        - idx (int)          : Indice of the closest values from the desire value
 
     Author: Simon Petrus
     """
@@ -62,19 +63,15 @@ def extract_observation(global_params, wav_mod_nativ, res_mod_nativ, cont='no', 
         cont                 (str): Boolean string. If the function is used to estimate the continuum cont='yes'
         obs_name             (str): Name of the current observation looping
         indobs               (int): Index of the current observation looping
-    Returns:
-        obs_spectro      (n-array): List containing the sub-spectra defined by the parameter "wav_for_adapt" with decreased resolution
-                                    [[wav_1, flx_1, err_1, reso_1], ..., [wav_n, flx_n, err_n, reso_n]]
-        obs_photo          (array): List containing the photometry (0 replace the spectral resolution here).
-                                    [wav_phot, flx_phot, err_phot, 0]
-        obs_spectro_ins    (array): List containing different instruments used for the data (1 per wavelength).
-                                    [[instru_range_1], ..., [instru_range_n]]
-        obs_photo_ins      (array): List containing different filters used for the data (1 per photometric point).
-                                    [filter_phot_1, filter_phot_2, ..., filter_phot_n]
-        obs_opt          (n-array): List containing the optional sub-arrays defined by the parameter "wav_for_adapt".
-                                    [[cov_1, tran_1, star_1], ..., [cov_n, tran_n, star_n]]  
 
-    Author: Simon Petrus / Adapted: Matthieu Ravet
+    Returns:
+        - obs_spectro (n-array)   : List containing the sub-spectra defined by the parameter "wav_for_adapt" with decreased resolution [[wav_1, flx_1, err_1, reso_1], ..., [wav_n, flx_n, err_n, reso_n]]
+        - obs_photo (array)       : List containing the photometry (0 replace the spectral resolution here). [wav_phot, flx_phot, err_phot, 0]
+        - obs_spectro_ins(array)  : List containing different instruments used for the data (1 per wavelength). [[instru_range_1], ..., [instru_range_n]]
+        - obs_photo_ins (array)   : List containing different filters used for the data (1 per photometric point). [filter_phot_1, filter_phot_2, ..., filter_phot_n]
+        - obs_opt (n-array)       : List containing the optional sub-arrays defined by the parameter "wav_for_adapt". [[cov_1, tran_1, star_1], ..., [cov_n, tran_n, star_n]]  
+
+    Author: Simon Petrus, Matthieu Ravet
     """
 
     # Extract the wavelengths, flux, errors, spectral resolution, and instrument/filter names from the observation file.
@@ -93,10 +90,10 @@ def extract_observation(global_params, wav_mod_nativ, res_mod_nativ, cont='no', 
             # If we want to decrease the resolution of the data: (if by_sample, the data don't need to be adapted)
             if global_params.adapt_method[indobs] == 'by_reso':
                 obs_spectro[c][1] = resolution_decreasing(global_params, cut[0], cut[1], cut[3], wav_mod_nativ, [], res_mod_obs,
-                                                    'obs', obs_name=obs_name, indobs=indobs)
+                                                    'obs', indobs=indobs)
             if cont == 'yes':
             # If we want to estimate and substract the continuum of the data:
-                obs_spectro[c][1] -= continuum_estimate(global_params, cut[0], cut[1], cut[3], obs_name=obs_name, indobs=indobs)
+                obs_spectro[c][1] -= continuum_estimate(global_params, cut[0], cut[1], cut[3], indobs=indobs)
                 
     return obs_spectro, obs_photo, obs_spectro_ins, obs_photo_ins, obs_opt
 
@@ -112,17 +109,13 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
         global_params  (object): Class containing each parameter
         obs_name          (str): Name of the current observation looping
         indobs            (int): Index of the current observation looping
+
     Returns:
-        obs_spectro   (n-array): List containing the sub-spectra defined by the parameter "wav_for_adapt".
-                                [[wav_1, flx_1, err_1, reso_1], ..., [wav_n, flx_n, err_n, reso_n]]
-        obs_photo       (array): List containing the photometry (0 replace the spectral resolution here).
-                                [wav_phot, flx_phot, err_phot, 0]
-        obs_spectro_ins (array): List containing different instruments used for the data (1 per wavelength).
-                                [[instru_1], ..., [instru_n]]
-        obs_photo_ins   (array): List containing different filters used for the data (1 per photometric point).
-                                [filter_phot_1, filter_phot_2, ..., filter_phot_n]
-        obs_opt       (n-array): List containing the optional sub-arrays defined by the parameter "wav_for_adapt".
-                                [[cov_1, tran_1, star_1], ..., [cov_n, tran_n, star_n]]
+        - obs_spectro (n-array)   : List containing the sub-spectra defined by the parameter "wav_for_adapt" with decreased resolution  [[wav_1, flx_1, err_1, reso_1], ..., [wav_n, flx_n, err_n, reso_n]]
+        - obs_photo (array)       : List containing the photometry (0 replace the spectral resolution here).  [wav_phot, flx_phot, err_phot, 0]
+        - obs_spectro_ins(array)  : List containing different instruments used for the data (1 per wavelength). [[instru_range_1], ..., [instru_range_n]]
+        - obs_photo_ins (array)   : List containing different filters used for the data (1 per photometric point). [filter_phot_1, filter_phot_2, ..., filter_phot_n]
+        - obs_opt (n-array)       : List containing the optional sub-arrays defined by the parameter "wav_for_adapt". [[cov_1, tran_1, star_1], ..., [cov_n, tran_n, star_n]] 
 
     Author: Simon Petrus, Matthieu Ravet and Allan Denis
     """
@@ -316,16 +309,16 @@ def adapt_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge, 
         obs_name          (str): Name of the current observation looping
         indobs            (int): Index of the current observation looping
     Returns:
-        flx_mod_extract (array): Flux of the spectrum with a decreased spectral resolution, re-sampled on the data wavelength grid
-        mod_photo       (array): List containing the photometry ('0' replace the spectral resolution here).
+        - mod_spectro (array)     : Flux of the spectrum with a decreased spectral resolution, re-sampled on the data wavelength grid
+        - mod_photo (array)       : List containing the photometry ('0' replace the spectral resolution here).
 
     Author: Simon Petrus
     """
     # Estimate and subtract the continuum (if needed)
     if global_params.continuum_sub[indobs] != 'NA':
-        mod_spectro, mod_photo = extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge, cont='yes', obs_name=obs_name)
+        mod_spectro, mod_photo = extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge, cont='yes', obs_name=obs_name, indobs=indobs)
     else:
-        mod_spectro, mod_photo = extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge, obs_name=obs_name)
+        mod_spectro, mod_photo = extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
 
     return mod_spectro, mod_photo
 
@@ -346,8 +339,8 @@ def extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge
         obs_name         (str): Name of the current observation looping
         indobs           (int): Index of the current observation looping
     Returns:
-        mod_spectro    (array): List containing the sub-spectra defined by the parameter "wav_for_adapt".
-        mod_photo      (array): List containing the photometry ('0' replace the spectral resolution here).
+        - mod_spectro (array) : List containing the sub-spectra defined by the parameter "wav_for_adapt".
+        - mod (array)         : List containing the photometry ('0' replace the spectral resolution here).
 
     Author: Simon Petrus
     """
@@ -362,13 +355,13 @@ def extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge
             # If we want to decrease the resolution of the data:
             if global_params.adapt_method[indobs] == 'by_reso':
                 mod_cut_flx = resolution_decreasing(global_params, cut[0], [], cut[3], wav_mod_nativ, flx_mod_nativ, res_mod_obs_merge[c],
-                                                    'mod', obs_name=obs_name, indobs=indobs)
+                                                    'mod', indobs=indobs)
             else:
                 mod_cut_flx = spectres(cut[0], wav_mod_nativ, flx_mod_nativ)
 
             # If we want to estimate the continuum of the data:
             if cont == 'yes':     
-                continuum = continuum_estimate(global_params, cut[0], mod_cut_flx, res_mod_obs_merge[c], obs_name=obs_name, indobs=indobs)
+                continuum = continuum_estimate(global_params, cut[0], mod_cut_flx, res_mod_obs_merge[c], indobs=indobs)
                 mod_cut_flx -= continuum
 
             # Concatenate to speed up the code
@@ -411,7 +404,7 @@ def convolve_and_sample(wv_channels, sigmas_wvs, model_wvs, model_fluxes, num_si
         model_fluxes       (array): the fluxes of the model 
         num_sigma          (float): number of +/- sigmas to evaluate the LSF to.
     Returns:
-        output_model       (array): the fluxes in each of the wavelength channels 
+        - output_model (array)      : the fluxes in each of the wavelength channels 
 
     Author: Jason Wang
     """
@@ -442,7 +435,7 @@ def convolve_and_sample(wv_channels, sigmas_wvs, model_wvs, model_fluxes, num_si
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def resolution_decreasing(global_params, wav_obs, flx_obs, res_obs, wav_mod_nativ, flx_mod_nativ, res_mod_obs, obs_or_mod, obs_name='', indobs=0):
+def resolution_decreasing(global_params, wav_obs, flx_obs, res_obs, wav_mod_nativ, flx_mod_nativ, res_mod_obs, obs_or_mod, indobs=0):
     """
     Decrease the resolution of a spectrum (data or model). The function calculates the FWHM as a function of the
     wavelengths for the data, the model, and for a custom spectral resolution (optional) and estimates the highest one
@@ -459,12 +452,11 @@ def resolution_decreasing(global_params, wav_obs, flx_obs, res_obs, wav_mod_nati
         flx_mod_nativ  (array): Flux of the model
         res_mod_obs    (array): Spectral resolution of the model as a function of the wavelength grid of the data
         obs_or_mod       (str): Parameter to identify if you want to manage a data or a model spectrum. 'obs' or 'mod'
-        obs_name         (str): Name of the current observation looping
         indobs           (int): Index of the current observation looping
     Returns:
-        flx_obs_final  (array): Flux of the spectrum with a decreased spectral resolution, re-sampled on the data wavelength grid
+        - flx_obs_final (array) : Flux of the spectrum with a decreased spectral resolution, re-sampled on the data wavelength grid
 
-    Author: Simon Petrus / Adapted: Matthieu Ravet
+    Author: Simon Petrus, Matthieu Ravet
     """
     # Estimate of the FWHM of the data as a function of the wavelength
     fwhm_obs = 2 * wav_obs / res_obs
@@ -494,7 +486,7 @@ def resolution_decreasing(global_params, wav_obs, flx_obs, res_obs, wav_mod_nati
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def continuum_estimate(global_params, wav, flx, res, obs_name='', indobs=0):
+def continuum_estimate(global_params, wav, flx, res, indobs=0):
     """
     Decrease the resolution of a spectrum (data or model). The function calculates the FWHM as a function of the
     wavelengths of the custom spectral resolution (estimated for the continuum). It then calculates a sigma to decrease
@@ -506,12 +498,11 @@ def continuum_estimate(global_params, wav, flx, res, obs_name='', indobs=0):
         wav            (array): Wavelength grid of the spectrum for which you want to estimate the continuum
         flx            (array): Flux of the spectrum for which you want to estimate the continuum
         res              (int): Spectral resolution of the spectrum for which you want to estimate the continuum
-        obs_name         (str): Name of the current observation looping
         indobs           (int): Index of the current observation looping
     Returns:
-        continuum      (array): Estimated continuum of the spectrum re-sampled on the data wavelength grid
+        - continuum (array)   : Estimated continuum of the spectrum re-sampled on the data wavelength grid
 
-    Author: Simon Petrus / Adapted: Matthieu Ravet
+    Author: Simon Petrus, Matthieu Ravet
 
     """
 

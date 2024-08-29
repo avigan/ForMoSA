@@ -1,0 +1,6 @@
+sphinx>=1.4
+ipykernel
+nbsphinx
+jupyter
+pandoc
+sphinx_rtd_theme

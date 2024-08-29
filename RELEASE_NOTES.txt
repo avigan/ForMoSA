@@ -331,9 +331,59 @@ Tests that have been done to checkup the changes:
     - Different high resolution datasets
     - Datasets combining photometric and spectroscopic data points 
      
-    
+
+
+
+- - - 
+
+28/07/2024
+
+Paulina Palma-Bifani, Matthieu Ravet 
+
+Comments:
+     - Commenting all functions
+     - Replacing physical constants with astropy ones
+
+Tests:
+    None
+
+
+- - - 
+
+02/08/2024
+
+Paulina Palma-Bifani
+
+Comments:
+     - Adapted docstrings returns in some functions (not all)
+     - Generated documentation for the webpage 
+     - This is a test. I will do a second commit afterwards with the complete updated docs.
+
+Tests:
+    Webpage API is generating without issues locally (make html)
+
+
+
+- - - 
+
+08/08/2024
+
+Matthieu Ravet
+
+Comments:
+     - Correcting for the HiRISE type data merging when using cuts (i.e. remplacing axis=0 by axis=1). In the future, it would be
+     nice to create a more simple version of the star and systematic matrix (for now its (1, lambda, sys/star) it would be best to
+     have (lambda, sys/star) to avoid keeping large matrices accross the inversion)
+
+Tests:
+    - Test with CRIRES+ datasets with cuts in the adapt and in the fit
+
+
+- - -
 
 29/08/2024
+
+Allan Denis 
 
 Comments:
       - New approach in the adaptation of the data in the case where the user defined separated windows in 'wave_for_adapt' (eg : '1.4, 1.5 / 1.6, 1.7 / 1.8, 1.9 / ... '). Instead of making a loop on each sub-interval, we now combine the data in one array and do the adaptation on one array
