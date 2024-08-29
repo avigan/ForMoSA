@@ -193,11 +193,11 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
                 else:
                     transm_obs_ns_u = np.asarray([])
                 if len(star_flx_obs) != 0: # Add star flux (if necessary)
-                    star_flx_obs_ns_u = star_flx_obs[0,ind_spectro]
+                    star_flx_obs_ns_u = star_flx_obs[ind_spectro]
                 else:
                     star_flx_obs_ns_u = np.asarray([])
                 if len(system_obs) != 0: # Add systematics model (if necessary)
-                    system_obs_ns_u = system_obs[0,ind_spectro]
+                    system_obs_ns_u = system_obs[ind_spectro]
                 else:
                     system_obs_ns_u = np.asarray([])
                 wav_obs_photo_ns_u = wav_obs_photo[ind_photo]
@@ -214,13 +214,14 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
                 if len(transm_obs_ns_u) != 0: # Merge the transmissions (if necessary)
                     transm_obs_ns_u = np.concatenate((transm_obs_ns_u, transm_obs[ind_spectro]))
                 if len(star_flx_obs_ns_u) != 0: # Merge star fluxes (if necessary)
-                    star_flx_obs_ns_u = np.concatenate((star_flx_obs_ns_u, star_flx_obs[0,ind_grid_spectro_sel]),axis=0)
+                    star_flx_obs_ns_u = np.concatenate((star_flx_obs_ns_u, star_flx_obs[ind_grid_spectro_sel]),axis=0)
                 if len(system_obs) != 0: # Merge systematics model (if necessary)
-                    system_obs_ns_u = np.concatenate((system_obs_ns_u, system_obs[0,ind_grid_spectro_sel]), axis=0)
+                    system_obs_ns_u = np.concatenate((system_obs_ns_u, system_obs[ind_grid_spectro_sel]), axis=0)
                 wav_obs_photo_ns_u = np.concatenate((wav_obs_photo_ns_u, wav_obs_photo[ind_photo]))
                 flx_obs_photo_ns_u = np.concatenate((flx_obs_photo_ns_u, flx_obs_photo[ind_photo]))
                 err_obs_photo_ns_u = np.concatenate((err_obs_photo_ns_u, err_obs_photo[ind_photo]))
                 flx_mod_photo_ns_u = np.concatenate((flx_mod_photo_ns_u, flx_mod_photo_cut))
+
 
         # Modification of the synthetic spectrum with the extra-grid parameters
         modif_spec_LL = modif_spec(global_params, theta, theta_index,
@@ -228,25 +229,31 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
                                     wav_obs_photo_ns_u,  flx_obs_photo_ns_u, err_obs_photo_ns_u,  flx_mod_photo_ns_u, 
                                     transm_obs_ns_u, star_flx_obs_ns_u, system_obs_ns_u, indobs=indobs)
         
+        
+
         flx_obs_spectro_modif, flx_obs_photo_modif = modif_spec_LL[1], modif_spec_LL[5]
         flx_mod_spectro_modif, flx_mod_photo_modif = modif_spec_LL[3], modif_spec_LL[7]
         err_obs_spectro_modif, err_obs_photo_modif = modif_spec_LL[2], modif_spec_LL[6]
         inv_cov_obs_modif = inv_cov_obs_ns_u
         ck = modif_spec_LL[8]
         planet_contribution, stellar_contribution, star_flx_obs, systematics = modif_spec_LL[9], modif_spec_LL[10], modif_spec_LL[11], modif_spec_LL[12]
-        
+
         if global_params.use_lsqr[indobs] == 'True':
             # If our data is contaminated by starlight difraction, the model is the sum of the estimated stellar contribution + planet model
-            flx_mod_spectro_modif = planet_contribution * flx_mod_spectro_modif + np.dot(stellar_contribution, star_flx_obs[0].T)
+  
+            flx_mod_spectro_modif = flx_mod_spectro_modif + star_flx_obs
             if len(systematics) > 0:
                 flx_mod_spectro_modif += systematics
-                
+
 
         # Computation of the photometry logL
         if len(flx_obs_photo_modif) != 0:
+            
             logL_photo = logL_chi2_classic(flx_obs_photo_modif-flx_mod_photo_modif, err_obs_photo_modif)
+            
         else:
             logL_photo = 0
+
 
         # Computation of the spectroscopy logL
         if len(flx_obs_spectro_modif) != 0:
@@ -275,7 +282,7 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
 
         # Compute the final logL (sum of all likelihood under the hypothesis of independent instruments)
         FINAL_logL = logL_photo + logL_spectro + FINAL_logL
-        
+
     if for_plot == 'no':
         return FINAL_logL
     else:

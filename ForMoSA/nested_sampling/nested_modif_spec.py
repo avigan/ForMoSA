@@ -11,10 +11,11 @@ import scipy.signal as sg
 import scipy.optimize as optimize
 import matplotlib.pyplot as plt
 import time 
+import scipy
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def lsq_fct(flx_obs_spectro, err_obs_spectro, star_flx_obs, transm_obs, flx_mod_spectro, system_obs, ccf_method = 'continuum_unfiltered'):
+def lsq_fct(global_params, wave, indobs, flx_obs_spectro, err_obs_spectro, star_flx_obs, transm_obs, flx_mod_spectro, system_obs, ccf_method = 'continuum_unfiltered'):
     """
     Estimation of the contribution of the planet and of the star to a spectrum (Used for HiRISE data)
 
@@ -33,63 +34,104 @@ def lsq_fct(flx_obs_spectro, err_obs_spectro, star_flx_obs, transm_obs, flx_mod_
         flx_obs_spectro  : New flux of the data
         star_flx_obs     : New star flux of the data
     """
-    flx_mod_spectro *= transm_obs
-    star_flx_0 = star_flx_obs[0,:,len(star_flx_obs[0][0]) // 2]
-
-    # # # # # Continuum estimation with lowpass filtering
-    #
-    # Low-pass filtering
-    flx_obs_spectro_continuum = sg.savgol_filter(flx_obs_spectro, 301, 2)
-    star_flx_obs_continuum = sg.savgol_filter(star_flx_0, 301, 2)
-    flx_mod_spectro_continuum = sg.savgol_filter(flx_mod_spectro, 301, 2)
-    #
-    # # # # #
-        
-    if ccf_method == 'continuum_filtered':
-        # Removal of low-pass filtered data
-        flx_obs_spectro = flx_obs_spectro - flx_obs_spectro_continuum + np.nanmedian(flx_obs_spectro)
-        star_flx_obs = star_flx_obs - star_flx_obs_continuum + np.nanmedian(star_flx_obs)
-        flx_mod_spectro = flx_mod_spectro - flx_mod_spectro_continuum + np.nanmedian(flx_mod_spectro)
-    elif ccf_method == 'continuum_unfiltered':
-        flx_mod_spectro = flx_mod_spectro - flx_mod_spectro_continuum * star_flx_0 / star_flx_obs_continuum
-        for i in range(len(star_flx_obs[0][0])):
-            star_flx_obs[0,:,i] = star_flx_obs[0,:,i] * flx_obs_spectro_continuum / star_flx_obs_continuum
     
-    # # # # # Least squares estimation
-    #    
-    # Construction of the matrix
-    if len(system_obs) > 0:
-        A_matrix = np.zeros([np.size(flx_obs_spectro), 1 + len(star_flx_obs[0][0]) + len(system_obs[0][0])])
-        for j in range(len(system_obs[0][0])):
-            A_matrix[:,1+len(star_flx_obs[0][0])+j] = system_obs[0][:,j] * err_obs_spectro
-    else:
-        A_matrix = np.zeros([np.size(flx_obs_spectro), 1 + len(star_flx_obs[0][0])])
-        
-    for j in range(len(star_flx_obs[0][0])):
-        A_matrix[:,1+j] = star_flx_obs[0][:,j] * err_obs_spectro
-        
-    A_matrix[:,0] = flx_mod_spectro * err_obs_spectro
+    wave_final, cp_final, cs_final, flx_mod_spectro_final, flx_obs_spectro_final, star_flx_obs_final, systematics_final, flx_mod_spectro_nativ, err_obs_spectro_final = np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([])
     
-    # Least square 
-    res = optimize.lsq_linear(A_matrix, flx_obs_spectro * err_obs_spectro, bounds=([0]*len(A_matrix[0]), [1]*len(A_matrix[0])))
-    cp = res.x[0]
-    
-    cs = np.array([])
-    for i in range(len(star_flx_obs[0][0])):
-        cs = np.append(cs, res.x[i+1])
+    for wave_fit_i in global_params.wav_fit[indobs].split('/'):
+        min_wave_i = float(wave_fit_i.split(',')[0])
+        max_wave_i = float(wave_fit_i.split(',')[1])
+        ind = np.where((wave <= max_wave_i) & (wave >= min_wave_i))
+      
+        wave_ind = wave[ind]
+        flx_mod_spectro_ind = flx_mod_spectro[ind]
+        transm_obs_ind = transm_obs[ind]
+        star_flx_obs_ind = star_flx_obs[ind,:][0]
+        star_flx_0_ind = star_flx_obs_ind[:,len(star_flx_obs_ind[0]) // 2]
+        flx_obs_spectro_ind = flx_obs_spectro[ind]
+        err_obs_spectro_ind = err_obs_spectro[ind]
         
-    systematics_c = np.array([])
-    systematics = np.asarray([])
-    if len(system_obs) > 0:
-        for i in range(len(system_obs[0][0])):
-            systematics_c = np.append(systematics_c, res.x[1+len(star_flx_obs[0][0])+i])
+        if len(system_obs) > 0:
+            system_obs_ind = system_obs[ind,:][0]
             
-        systematics = np.dot(systematics_c, system_obs[0].T)
+        flx_mod_spectro_ind *= transm_obs_ind / 120
+        star_flx_0_ind = star_flx_obs_ind[:,len(star_flx_obs_ind[0]) // 2]
     
-    #
-    # # # # #
+        # # # # # Continuum estimation with lowpass filtering
+        #
+        # Low-pass filtering
+        flx_obs_spectro_continuum = sg.savgol_filter(flx_obs_spectro_ind, 301, 2)
+        star_flx_obs_continuum = sg.savgol_filter(star_flx_0_ind, 301, 2)
+        flx_mod_spectro_continuum = sg.savgol_filter(flx_mod_spectro_ind, 301, 2)
+        #
+        # # # # #
+            
+        if ccf_method == 'continuum_filtered':
+            # Removal of low-pass filtered data
+            flx_obs_spectro_ind = flx_obs_spectro_ind - flx_obs_spectro_continuum + np.nanmedian(flx_obs_spectro_ind)
+            star_flx_obs_ind = star_flx_obs_ind - star_flx_obs_continuum + np.nanmedian(star_flx_obs_ind)
+            flx_mod_spectro_ind = flx_mod_spectro_ind - flx_mod_spectro_continuum + np.nanmedian(flx_mod_spectro_ind)
+        elif ccf_method == 'continuum_unfiltered':
+            flx_mod_spectro_ind = flx_mod_spectro_ind - flx_mod_spectro_continuum * star_flx_0_ind / star_flx_obs_continuum
+            for i in range(len(star_flx_obs_ind[0])):
+                star_flx_obs_ind[:,i] = star_flx_obs_ind[:,i] * flx_obs_spectro_continuum / star_flx_obs_continuum
+                
+        
+        # # # # # Least squares estimation
+        #    
+        # Construction of the matrix
+        if len(system_obs) > 0:
+            A_matrix = np.zeros([np.size(flx_obs_spectro_ind), 1 + len(star_flx_obs_ind[0]) + len(system_obs_ind[0])])
+            for j in range(len(system_obs[0])):
+                A_matrix[:,1+len(star_flx_obs_ind[0])+j] = system_obs_ind[:,j] 
+        else:
+            A_matrix = np.zeros([np.size(flx_obs_spectro_ind), 1 + len(star_flx_obs_ind[0])])
+            
+        for j in range(len(star_flx_obs[0])):
+            A_matrix[:,1+j] = star_flx_obs_ind[:,j] * 1 / np.sqrt(err_obs_spectro_ind)
+            
+        A_matrix[:,0] = flx_mod_spectro_ind * 1 / np.sqrt(err_obs_spectro_ind)
+        
+        # Least square 
+        # Solve the linear system A.x = b 
+        A = A_matrix
+        b = flx_obs_spectro_ind * 1 / np.sqrt(err_obs_spectro_ind)
+        res = optimize.lsq_linear(A_matrix, b, bounds = (0, 1))
+
+        cp_ind = res.x[0]
+        
     
-    return cp, cs, flx_mod_spectro, flx_obs_spectro, star_flx_obs, systematics
+        cs_ind = np.array([])
+        for i in range(len(star_flx_obs[0])):
+            cs_ind = np.append(cs_ind, res.x[i+1])
+            
+        systematics_c = np.array([])
+        systematics_ind = np.asarray([])
+        if len(system_obs) > 0:
+            for i in range(len(system_obs[0])):
+                systematics_c = np.append(systematics_c, res.x[1+len(star_flx_obs_ind[0])+i])
+                
+            systematics_ind = np.dot(systematics_c, system_obs_ind.T)
+            
+        star_flx_obs_ind = np.dot(cs_ind, star_flx_obs_ind.T)
+        
+        flx_mod_spectro_nativ_ind = np.copy(flx_mod_spectro_ind)
+        flx_mod_spectro_ind *= cp_ind
+        #
+        # # # # #
+        
+        # Generate final products
+        
+        wave_final = np.append(wave_final, wave_ind)
+        cp_final = np.append(cp_final, cp_ind)
+        cs_final = np.append(cs_final, cs_ind)
+        flx_mod_spectro_final = np.append(flx_mod_spectro_final, flx_mod_spectro_ind)
+        flx_obs_spectro_final = np.append(flx_obs_spectro_final, flx_obs_spectro_ind)
+        star_flx_obs_final = np.append(star_flx_obs_final, star_flx_obs_ind)
+        systematics_final = np.append(systematics_final, systematics_ind)
+        flx_mod_spectro_nativ = np.append(flx_mod_spectro_nativ, flx_mod_spectro_nativ_ind)
+        err_obs_spectro_final = np.append(err_obs_spectro_final, err_obs_spectro_ind)
+        
+    return cp_final, cs_final, flx_mod_spectro_final, flx_obs_spectro_final, star_flx_obs_final, systematics_final, flx_mod_spectro_nativ, wave_final, err_obs_spectro_final
 
 
 def calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro, flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked,
@@ -476,7 +518,7 @@ def modif_spec(global_params, theta, theta_index,
                 wav_obs_spectro, flx_obs_spectro, err_obs_spectro, flx_mod_spectro = doppler_fct(wav_obs_spectro, flx_obs_spectro,
                                                                                         err_obs_spectro, flx_mod_spectro,
                                                                                         rv_picked)
-
+                
     # Application of a synthetic interstellar extinction to the interpolated synthetic spectrum.
     if global_params.av != "NA":
         if global_params.av[0] == 'constant':
@@ -572,70 +614,65 @@ def modif_spec(global_params, theta, theta_index,
     # Calculation of the dilution factor Ck and re-normalization of the interpolated synthetic spectrum.
     # From the radius and the distance.
     
-    if global_params.r != "NA" and global_params.d != "NA":
-        if global_params.r[0] == "constant":
-            r_picked = float(global_params.r[1])
-        else:
-            ind_theta_r = np.where(theta_index == 'r')
-            r_picked = theta[ind_theta_r[0][0]]
-        if global_params.d[0] == "constant":
-            d_picked = float(global_params.d[1])
-        else:
-            ind_theta_d = np.where(theta_index == 'd')
-            d_picked = theta[ind_theta_d[0][0]]
-
-        # With the extra alpha scaling
-        if len(global_params.alpha) > 3: # If you want separate alpha for each observations
-            if global_params.alpha[indobs*3] != "NA":
-                if global_params.alpha[indobs*3] == "constant":
-                    alpha_picked = float(global_params.alpha[indobs*3+1])
-                else:
-                    ind_theta_alpha = np.where(theta_index == f'alpha_{indobs}')
-                    alpha_picked = theta[ind_theta_alpha[0][0]]
-                flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
-                                                        flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked,
-                                                        alpha=alpha_picked)
-            else: # Without the extra alpha scaling
-                flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
-                                                  flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked)
-        else: # If you want 1 common alpha for all observations
-            if global_params.alpha != "NA":
-                if global_params.alpha[0] == "constant":
-                    alpha_picked = float(global_params.alpha[1])
-                else:
-                    ind_theta_alpha = np.where(theta_index == 'alpha')
-                    alpha_picked = theta[ind_theta_alpha[0][0]]
-                flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
-                                                        flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked,
-                                                        alpha=alpha_picked)   
-            else: # Without the extra alpha scaling
-                flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
-                                                    flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked)
+    if global_params.use_lsqr[indobs] == 'True':
+        planet_contribution, stellar_contribution, flx_mod_spectro, flx_obs_spectro, star_flx_obs, systematics, flx_mod_spectro_nativ, wav_obs_spectro, err_obs_spectro = lsq_fct(global_params, wav_obs_spectro, indobs, flx_obs_spectro, err_obs_spectro, star_flx_obs, transm_obs, flx_mod_spectro, system_obs)
+        _, _, ck = calc_ck(np.copy(flx_obs_spectro), err_obs_spectro, np.copy(flx_mod_spectro),
+                                  flx_obs_photo, err_obs_photo, flx_mod_photo, 0, 0, 0, analytic='yes')
+    else:
         # Set HiRES contribution to 1 if not used
-        planet_contribution, stellar_contribution, systematics = 1, 1, 1                
-    # Analytically
-    # If MOSAIC
-    elif global_params.r == "NA" and global_params.d == "NA" and global_params.use_lsqr[indobs] == 'False':
-        flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
-                                                flx_obs_photo, err_obs_photo, flx_mod_photo, 0, 0, 0,
-                                                analytic='yes')
-            
-        planet_contribution, stellar_contribution, systematics = 1, 1, 1
-
-
-    elif global_params.r == "NA" and global_params.d == "NA" and global_params.use_lsqr[indobs] == 'True':   
-        # global_params.use_lsqr = 'True', so no need to re-normalize the interpolated sythetic spectrum because the least squares automatically does it
-            
-        _, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, np.copy(flx_mod_spectro), 
-                        flx_obs_photo, err_obs_photo, flx_mod_photo, 0, 0, 0,
-                        analytic='yes')
+        planet_contribution, stellar_contribution, systematics = 1, 1, np.asarray([])  
         
-        planet_contribution, stellar_contribution, flx_mod_spectro, flx_obs_spectro, star_flx_obs, systematics = lsq_fct(flx_obs_spectro, err_obs_spectro, star_flx_obs, transm_obs, flx_mod_spectro, system_obs)
-
-
-    else:   # either global_params.r or global_params.d is set to 'NA' 
-        print('WARNING: You need to define a radius AND a distance, or set them both to "NA"')
-        exit()
+        if global_params.r != "NA" and global_params.d != "NA":
+            if global_params.r[0] == "constant":
+                r_picked = float(global_params.r[1])
+            else:
+                ind_theta_r = np.where(theta_index == 'r')
+                r_picked = theta[ind_theta_r[0][0]]
+            if global_params.d[0] == "constant":
+                d_picked = float(global_params.d[1])
+            else:
+                ind_theta_d = np.where(theta_index == 'd')
+                d_picked = theta[ind_theta_d[0][0]]
+    
+            # With the extra alpha scaling
+            if len(global_params.alpha) > 3: # If you want separate alpha for each observations
+                if global_params.alpha[indobs*3] != "NA":
+                    if global_params.alpha[indobs*3] == "constant":
+                        alpha_picked = float(global_params.alpha[indobs*3+1])
+                    else:
+                        ind_theta_alpha = np.where(theta_index == f'alpha_{indobs}')
+                        alpha_picked = theta[ind_theta_alpha[0][0]]
+                    flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
+                                                            flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked,
+                                                            alpha=alpha_picked)
+                else: # Without the extra alpha scaling
+                    flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
+                                                      flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked)
+            else: # If you want 1 common alpha for all observations
+                if global_params.alpha != "NA":
+                    if global_params.alpha[0] == "constant":
+                        alpha_picked = float(global_params.alpha[1])
+                    else:
+                        ind_theta_alpha = np.where(theta_index == 'alpha')
+                        alpha_picked = theta[ind_theta_alpha[0][0]]
+                    flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
+                                                            flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked,
+                                                            alpha=alpha_picked)   
+                else: # Without the extra alpha scaling
+                    flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
+                                                        flx_obs_photo, err_obs_photo, flx_mod_photo, r_picked, d_picked)
+                  
+        # Analytically
+        # If MOSAIC
+        elif global_params.r == "NA" and global_params.d == "NA":
+            flx_mod_spectro, flx_mod_photo, ck = calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro,
+                                                    flx_obs_photo, err_obs_photo, flx_mod_photo, 0, 0, 0,
+                                                    analytic='yes')
+                
+    
+        else:   # either global_params.r or global_params.d is set to 'NA' 
+            print('WARNING: You need to define a radius AND a distance, or set them both to "NA"')
+            exit()
 
     return wav_obs_spectro, flx_obs_spectro, err_obs_spectro, flx_mod_spectro, wav_obs_photo, flx_obs_photo, err_obs_photo, flx_mod_photo, ck, planet_contribution, stellar_contribution, star_flx_obs, systematics, transm_obs
 

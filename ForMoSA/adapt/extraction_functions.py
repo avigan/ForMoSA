@@ -178,6 +178,7 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
                     i += 1
                 except:
                     break
+                
         # Only take the covariance if you use the chi2_covariance likelihood function (will need to be change when new likelihood functions using the
         # covariance matrix will come)
         if global_params.logL_type[indobs] != 'chi2_covariance':
@@ -215,7 +216,6 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
         else:
             wav_for_adapt_tab = global_params.wav_for_adapt[indobs].split('/')
 
-
         # Photometry part of the data (OUT OF THE WINDOW LOOP)
         ind_photometry = np.where(res == 0.0)
         obs_photo = np.asarray([wav[ind_photometry], flx[ind_photometry], err[ind_photometry],
@@ -251,20 +251,51 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
                 transm_spectro = np.asarray([])
             
             if len(star_flx) != 0:
-                star_flx_spectro = np.delete(star_flx[ind,:], ind_photometry, axis=0)
+                star_flx_spectro = np.delete(star_flx[ind,:], ind_photometry, axis=0)[0]
             else:
                 star_flx_spectro = np.asarray([])
                 
             if len(system) != 0:
-                system_spectro = np.delete(system[ind,:], ind_photometry, axis=0)
+                system_spectro = np.delete(system[ind,:], ind_photometry, axis=0)[0]
             else:
                 system_spectro = np.asarray([])
+                
 
             # Merge spectroscopic data
             obs_spectro[range_ind] = [wav_spectro, flx_spectro, err_spectro, res_spectro]
             obs_opt[range_ind] = [cov_spectro, transm_spectro, star_flx_spectro, system_spectro]
             obs_spectro_ins[range_ind] = ins_spectro
             
+        
+        wav_spectro_concat, flx_spectro_concat, err_spectro_concat, res_spectro_concat = [], [], [], []
+        cov_spectro_concat, transm_spectro_concat, star_flx_spectro_concat, system_spectro_concat = [], [], [], []
+        ins_spectro_concat = []
+        
+        for sublist in obs_spectro:
+            wav_spectro_concat.extend(sublist[0])
+            flx_spectro_concat.extend(sublist[1])
+            err_spectro_concat.extend(sublist[2])
+            res_spectro_concat.extend(sublist[3])
+            
+            
+        for sublist in obs_opt:
+            cov_spectro_concat.extend(sublist[0])
+            transm_spectro_concat.extend(sublist[1])
+            star_flx_spectro_concat.extend(sublist[2])
+            system_spectro_concat.extend(sublist[3])
+            
+        for sublist in obs_spectro_ins:
+            ins_spectro_concat.extend(sublist[0])
+            
+        obs_spectro = np.empty(1, dtype=object)
+        obs_opt = np.empty(1, dtype=object)
+        obs_spectro_ins = np.empty(1, dtype=object)
+            
+        obs_spectro[0] = [np.array(wav_spectro_concat), np.array(flx_spectro_concat), np.array(err_spectro_concat), np.array(res_spectro_concat)]
+        obs_opt[0] = [np.array(cov_spectro_concat), np.array(transm_spectro_concat), np.array(star_flx_spectro_concat), np.array(system_spectro_concat)]
+        obs_spectro_ins[0] = np.array(ins_spectro_concat)
+        
+        
         return obs_spectro, obs_photo, obs_spectro_ins, obs_photo_ins, obs_opt   
 
 
