@@ -53,7 +53,7 @@ def lsq_fct(global_params, wave, indobs, flx_obs_spectro, err_obs_spectro, star_
         if len(system_obs) > 0:
             system_obs_ind = system_obs[ind,:][0]
             
-        flx_mod_spectro_ind *= transm_obs_ind / 120
+        flx_mod_spectro_ind *= transm_obs_ind 
         star_flx_0_ind = star_flx_obs_ind[:,len(star_flx_obs_ind[0]) // 2]
     
         # # # # # Continuum estimation with lowpass filtering
@@ -80,22 +80,21 @@ def lsq_fct(global_params, wave, indobs, flx_obs_spectro, err_obs_spectro, star_
         #    
         # Construction of the matrix
         if len(system_obs) > 0:
-            A_matrix = np.zeros([np.size(flx_obs_spectro_ind), 1 + len(star_flx_obs_ind[0]) + len(system_obs_ind[0])])
+            A = np.zeros([np.size(flx_obs_spectro_ind), 1 + len(star_flx_obs_ind[0]) + len(system_obs_ind[0])])
             for j in range(len(system_obs[0])):
-                A_matrix[:,1+len(star_flx_obs_ind[0])+j] = system_obs_ind[:,j] 
+                A[:,1+len(star_flx_obs_ind[0])+j] = system_obs_ind[:,j] 
         else:
-            A_matrix = np.zeros([np.size(flx_obs_spectro_ind), 1 + len(star_flx_obs_ind[0])])
+            A = np.zeros([np.size(flx_obs_spectro_ind), 1 + len(star_flx_obs_ind[0])])
             
         for j in range(len(star_flx_obs[0])):
-            A_matrix[:,1+j] = star_flx_obs_ind[:,j] * 1 / np.sqrt(err_obs_spectro_ind)
+            A[:,1+j] = star_flx_obs_ind[:,j] * 1 / np.sqrt(err_obs_spectro_ind)
             
-        A_matrix[:,0] = flx_mod_spectro_ind * 1 / np.sqrt(err_obs_spectro_ind)
+        A[:,0] = flx_mod_spectro_ind * 1 / np.sqrt(err_obs_spectro_ind)
         
         # Least square 
         # Solve the linear system A.x = b 
-        A = A_matrix
         b = flx_obs_spectro_ind * 1 / np.sqrt(err_obs_spectro_ind)
-        res = optimize.lsq_linear(A_matrix, b, bounds = (0, 1))
+        res = optimize.lsq_linear(A, b, bounds = (0, 1))
 
         cp_ind = res.x[0]
         
