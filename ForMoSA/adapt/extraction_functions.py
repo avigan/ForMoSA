@@ -219,6 +219,7 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
         obs_spectro = np.empty(len(wav_for_adapt_tab), dtype=object)
         obs_opt = np.empty(len(wav_for_adapt_tab), dtype=object)
         obs_spectro_ins = np.empty(len(wav_for_adapt_tab), dtype=object)
+        
 
         for range_ind, rangee in enumerate(wav_for_adapt_tab):
             rangee = rangee.split(',')
@@ -259,36 +260,6 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
             obs_opt[range_ind] = [cov_spectro, transm_spectro, star_flx_spectro, system_spectro]
             obs_spectro_ins[range_ind] = ins_spectro
             
-        
-        wav_spectro_concat, flx_spectro_concat, err_spectro_concat, res_spectro_concat = [], [], [], []
-        cov_spectro_concat, transm_spectro_concat, star_flx_spectro_concat, system_spectro_concat = [], [], [], []
-        ins_spectro_concat = []
-        
-        for sublist in obs_spectro:
-            wav_spectro_concat.extend(sublist[0])
-            flx_spectro_concat.extend(sublist[1])
-            err_spectro_concat.extend(sublist[2])
-            res_spectro_concat.extend(sublist[3])
-            
-            
-        for sublist in obs_opt:
-            cov_spectro_concat.extend(sublist[0])
-            transm_spectro_concat.extend(sublist[1])
-            star_flx_spectro_concat.extend(sublist[2])
-            system_spectro_concat.extend(sublist[3])
-            
-        for sublist in obs_spectro_ins:
-            ins_spectro_concat.extend(sublist[0])
-            
-        obs_spectro = np.empty(1, dtype=object)
-        obs_opt = np.empty(1, dtype=object)
-        obs_spectro_ins = np.empty(1, dtype=object)
-            
-        obs_spectro[0] = [np.array(wav_spectro_concat), np.array(flx_spectro_concat), np.array(err_spectro_concat), np.array(res_spectro_concat)]
-        obs_opt[0] = [np.array(cov_spectro_concat), np.array(transm_spectro_concat), np.array(star_flx_spectro_concat), np.array(system_spectro_concat)]
-        obs_spectro_ins[0] = np.array(ins_spectro_concat)
-        
-        
         return obs_spectro, obs_photo, obs_spectro_ins, obs_photo_ins, obs_opt   
 
 
