@@ -356,10 +356,10 @@ class PlottingForMoSA():
         self._get_posteriors()
         
 
-        fig = corner.corner(self.posterior_to_plot[burn_in:,:-1],
+        fig = corner.corner(self.posterior_to_plot[burn_in:],
                             weights=self.weights[burn_in:],
-                            labels=self.posteriors_names[:-1],
-                            range=[0.999999 for p in self.posteriors_names[:-1]],
+                            labels=self.posteriors_names,
+                            range=[0.999999 for p in self.posteriors_names],
                             levels=levels_sig,
                             bins=bins,
                             smooth=1,

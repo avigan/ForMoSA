@@ -274,11 +274,11 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">transm_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">star_flx_obs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Add star flux (if necessary)</span>
-                    <span class="n">star_flx_obs_ns_u</span> <span class="o">=</span> <span class="n">star_flx_obs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">ind_spectro</span><span class="p">]</span>
+                    <span class="n">star_flx_obs_ns_u</span> <span class="o">=</span> <span class="n">star_flx_obs</span><span class="p">[</span><span class="n">ind_spectro</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">star_flx_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">system_obs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Add systematics model (if necessary)</span>
-                    <span class="n">system_obs_ns_u</span> <span class="o">=</span> <span class="n">system_obs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">ind_spectro</span><span class="p">]</span>
+                    <span class="n">system_obs_ns_u</span> <span class="o">=</span> <span class="n">system_obs</span><span class="p">[</span><span class="n">ind_spectro</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">system_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>
                 <span class="n">wav_obs_photo_ns_u</span> <span class="o">=</span> <span class="n">wav_obs_photo</span><span class="p">[</span><span class="n">ind_photo</span><span class="p">]</span>
@@ -295,13 +295,14 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transm_obs_ns_u</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Merge the transmissions (if necessary)</span>
                     <span class="n">transm_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">transm_obs_ns_u</span><span class="p">,</span> <span class="n">transm_obs</span><span class="p">[</span><span class="n">ind_spectro</span><span class="p">]))</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">star_flx_obs_ns_u</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Merge star fluxes (if necessary)</span>
-                    <span class="n">star_flx_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">star_flx_obs_ns_u</span><span class="p">,</span> <span class="n">star_flx_obs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">ind_grid_spectro_sel</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">star_flx_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">star_flx_obs_ns_u</span><span class="p">,</span> <span class="n">star_flx_obs</span><span class="p">[</span><span class="n">ind_spectro</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">system_obs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Merge systematics model (if necessary)</span>
-                    <span class="n">system_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">system_obs_ns_u</span><span class="p">,</span> <span class="n">system_obs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">ind_grid_spectro_sel</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">system_obs_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">system_obs_ns_u</span><span class="p">,</span> <span class="n">system_obs</span><span class="p">[</span><span class="n">ind_spectro</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">wav_obs_photo_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">wav_obs_photo_ns_u</span><span class="p">,</span> <span class="n">wav_obs_photo</span><span class="p">[</span><span class="n">ind_photo</span><span class="p">]))</span>
                 <span class="n">flx_obs_photo_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">flx_obs_photo_ns_u</span><span class="p">,</span> <span class="n">flx_obs_photo</span><span class="p">[</span><span class="n">ind_photo</span><span class="p">]))</span>
                 <span class="n">err_obs_photo_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">err_obs_photo_ns_u</span><span class="p">,</span> <span class="n">err_obs_photo</span><span class="p">[</span><span class="n">ind_photo</span><span class="p">]))</span>
                 <span class="n">flx_mod_photo_ns_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">flx_mod_photo_ns_u</span><span class="p">,</span> <span class="n">flx_mod_photo_cut</span><span class="p">))</span>
+
 
         <span class="c1"># Modification of the synthetic spectrum with the extra-grid parameters</span>
         <span class="n">modif_spec_LL</span> <span class="o">=</span> <span class="n">modif_spec</span><span class="p">(</span><span class="n">global_params</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">theta_index</span><span class="p">,</span>
@@ -309,25 +310,31 @@
                                     <span class="n">wav_obs_photo_ns_u</span><span class="p">,</span>  <span class="n">flx_obs_photo_ns_u</span><span class="p">,</span> <span class="n">err_obs_photo_ns_u</span><span class="p">,</span>  <span class="n">flx_mod_photo_ns_u</span><span class="p">,</span> 
                                     <span class="n">transm_obs_ns_u</span><span class="p">,</span> <span class="n">star_flx_obs_ns_u</span><span class="p">,</span> <span class="n">system_obs_ns_u</span><span class="p">,</span> <span class="n">indobs</span><span class="o">=</span><span class="n">indobs</span><span class="p">)</span>
         
+        
+
         <span class="n">flx_obs_spectro_modif</span><span class="p">,</span> <span class="n">flx_obs_photo_modif</span> <span class="o">=</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
         <span class="n">flx_mod_spectro_modif</span><span class="p">,</span> <span class="n">flx_mod_photo_modif</span> <span class="o">=</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
         <span class="n">err_obs_spectro_modif</span><span class="p">,</span> <span class="n">err_obs_photo_modif</span> <span class="o">=</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
         <span class="n">inv_cov_obs_modif</span> <span class="o">=</span> <span class="n">inv_cov_obs_ns_u</span>
         <span class="n">ck</span> <span class="o">=</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
         <span class="n">planet_contribution</span><span class="p">,</span> <span class="n">stellar_contribution</span><span class="p">,</span> <span class="n">star_flx_obs</span><span class="p">,</span> <span class="n">systematics</span> <span class="o">=</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">11</span><span class="p">],</span> <span class="n">modif_spec_LL</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
-        
+
         <span class="k">if</span> <span class="n">global_params</span><span class="o">.</span><span class="n">use_lsqr</span><span class="p">[</span><span class="n">indobs</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
             <span class="c1"># If our data is contaminated by starlight difraction, the model is the sum of the estimated stellar contribution + planet model</span>
-            <span class="n">flx_mod_spectro_modif</span> <span class="o">=</span> <span class="n">planet_contribution</span> <span class="o">*</span> <span class="n">flx_mod_spectro_modif</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">stellar_contribution</span><span class="p">,</span> <span class="n">star_flx_obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+  
+            <span class="n">flx_mod_spectro_modif</span> <span class="o">=</span> <span class="n">flx_mod_spectro_modif</span> <span class="o">+</span> <span class="n">star_flx_obs</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">systematics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">flx_mod_spectro_modif</span> <span class="o">+=</span> <span class="n">systematics</span>
-                
+
 
         <span class="c1"># Computation of the photometry logL</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flx_obs_photo_modif</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            
             <span class="n">logL_photo</span> <span class="o">=</span> <span class="n">logL_chi2_classic</span><span class="p">(</span><span class="n">flx_obs_photo_modif</span><span class="o">-</span><span class="n">flx_mod_photo_modif</span><span class="p">,</span> <span class="n">err_obs_photo_modif</span><span class="p">)</span>
+            
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logL_photo</span> <span class="o">=</span> <span class="mi">0</span>
+
 
         <span class="c1"># Computation of the spectroscopy logL</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flx_obs_spectro_modif</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -356,7 +363,7 @@
 
         <span class="c1"># Compute the final logL (sum of all likelihood under the hypothesis of independent instruments)</span>
         <span class="n">FINAL_logL</span> <span class="o">=</span> <span class="n">logL_photo</span> <span class="o">+</span> <span class="n">logL_spectro</span> <span class="o">+</span> <span class="n">FINAL_logL</span>
-        
+
     <span class="k">if</span> <span class="n">for_plot</span> <span class="o">==</span> <span class="s1">&#39;no&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FINAL_logL</span>
     <span class="k">else</span><span class="p">:</span>

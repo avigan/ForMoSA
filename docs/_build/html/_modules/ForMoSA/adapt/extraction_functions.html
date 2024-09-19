@@ -18,6 +18,7 @@
         <script src="../../../_static/documentation_options.js?v=51b770b3"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -42,10 +43,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">DEMO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">ForMoSA API</a></li>
 </ul>
 
@@ -231,7 +232,7 @@
             <span class="n">star_flx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>   
             <span class="n">is_star</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">star_flx</span> <span class="o">=</span> <span class="n">hdul</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;STAR FLX&#39;</span><span class="p">][:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">star_flx</span> <span class="o">=</span> <span class="n">hdul</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;STAR_FLX&#39;</span><span class="p">][:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">try</span><span class="p">:</span>
@@ -258,6 +259,7 @@
                     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">break</span>
+                
         <span class="c1"># Only take the covariance if you use the chi2_covariance likelihood function (will need to be change when new likelihood functions using the</span>
         <span class="c1"># covariance matrix will come)</span>
         <span class="k">if</span> <span class="n">global_params</span><span class="o">.</span><span class="n">logL_type</span><span class="p">[</span><span class="n">indobs</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;chi2_covariance&#39;</span><span class="p">:</span>
@@ -295,7 +297,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">wav_for_adapt_tab</span> <span class="o">=</span> <span class="n">global_params</span><span class="o">.</span><span class="n">wav_for_adapt</span><span class="p">[</span><span class="n">indobs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 
-
         <span class="c1"># Photometry part of the data (OUT OF THE WINDOW LOOP)</span>
         <span class="n">ind_photometry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="n">obs_photo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">wav</span><span class="p">[</span><span class="n">ind_photometry</span><span class="p">],</span> <span class="n">flx</span><span class="p">[</span><span class="n">ind_photometry</span><span class="p">],</span> <span class="n">err</span><span class="p">[</span><span class="n">ind_photometry</span><span class="p">],</span>
@@ -306,6 +307,7 @@
         <span class="n">obs_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wav_for_adapt_tab</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
         <span class="n">obs_opt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wav_for_adapt_tab</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
         <span class="n">obs_spectro_ins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wav_for_adapt_tab</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        
 
         <span class="k">for</span> <span class="n">range_ind</span><span class="p">,</span> <span class="n">rangee</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wav_for_adapt_tab</span><span class="p">):</span>
             <span class="n">rangee</span> <span class="o">=</span> <span class="n">rangee</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
@@ -331,14 +333,15 @@
                 <span class="n">transm_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>
             
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">star_flx</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">star_flx_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">star_flx</span><span class="p">[</span><span class="n">ind</span><span class="p">,:],</span> <span class="n">ind_photometry</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">star_flx_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">star_flx</span><span class="p">[</span><span class="n">ind</span><span class="p">,:],</span> <span class="n">ind_photometry</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">star_flx_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>
                 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">system</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">system_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">system</span><span class="p">[</span><span class="n">ind</span><span class="p">,:],</span> <span class="n">ind_photometry</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">system_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">system</span><span class="p">[</span><span class="n">ind</span><span class="p">,:],</span> <span class="n">ind_photometry</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">system_spectro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([])</span>
+                
 
             <span class="c1"># Merge spectroscopic data</span>
             <span class="n">obs_spectro</span><span class="p">[</span><span class="n">range_ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">wav_spectro</span><span class="p">,</span> <span class="n">flx_spectro</span><span class="p">,</span> <span class="n">err_spectro</span><span class="p">,</span> <span class="n">res_spectro</span><span class="p">]</span>

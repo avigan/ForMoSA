@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a config.ini &mdash; ForMoSA 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=51b770b3"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Demo AB Pic b" href="demoabpic.html" />
+    <link rel="prev" title="Exo-REM" href="exorem_info.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ForMoSA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../demo.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../demo.html#observation-s">Observation(s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../demo.html#atmospheric-grids">Atmospheric grids</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../demo.html#configuration-file">Configuration file</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Create a <code class="docutils literal notranslate"><span class="pre">config.ini</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#One-observation">One observation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Multiple-observations">Multiple observations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demo.html#demos">Demos</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">ForMoSA API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ForMoSA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../demo.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Create a <code class="docutils literal notranslate"><span class="pre">config.ini</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/config_file.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Create-a-config.ini">
+<h1>Create a <code class="docutils literal notranslate"><span class="pre">config.ini</span></code><a class="headerlink" href="#Create-a-config.ini" title="Link to this heading"></a></h1>
+<p>This section will help you set up your configuration file.</p>
+<section id="One-observation">
+<h2>One observation<a class="headerlink" href="#One-observation" title="Link to this heading"></a></h2>
+<p>Let’s say you obtain a spectrum of your favorite exoplanet with the instrument <a class="reference external" href="https://arxiv.org/pdf/1403.7520">Gemini/GPI</a> operating between 0.9-2.4 μm at a spectral resolution of R~45.</p>
+<p>You have converted your data into <code class="docutils literal notranslate"><span class="pre">GPI_data.fits</span></code> and chosen a grid; <code class="docutils literal notranslate"><span class="pre">EXOREM_native.nc</span></code> for instance</p>
+<p>Then the config file should look like :</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">config_path</span><span class="p">]</span>
+    <span class="c1"># Path to the observed spectrum file</span>
+    <span class="n">observation_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/inputs/data.fits&#39;</span>
+
+    <span class="c1"># Path to store your interpolated grid</span>
+    <span class="n">adapt_store_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/adapted_grid/&#39;</span>
+
+    <span class="c1"># Path where you wish to store your results.</span>
+    <span class="n">result_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/adapted_grid/outputs/&#39;</span>
+
+    <span class="c1"># Path of your initial grid of models</span>
+    <span class="n">model_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/adapted_grid/model.nc&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_adapt</span><span class="p">]</span>
+    <span class="c1"># Wavelength range used for the extraction of data and adaptation of the grid (separated windows can be defined).</span>
+    <span class="c1"># Format : &#39;window1_min,window1_max / window2_min,window2_max / ... / windown_min,windown_max&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">wav_for_adapt</span> <span class="o">=</span> <span class="s1">&#39;0.9,2.4&#39;</span>
+
+    <span class="c1"># Method used to adapt the synthetic spectra to the data.</span>
+    <span class="c1"># example : &#39;by_reso&#39; : A Gaussian law is convolved to the spectrum to decrease the resolution as a function of the</span>
+    <span class="c1"># wavelength.</span>
+    <span class="c1">#           &#39;by_sample&#39; : The spectrum is directly re-sampled to the wavelength grid of the data, using the module</span>
+    <span class="c1"># python spectres.</span>
+    <span class="c1"># Format : &#39;by_reso&#39; or &#39;by_adapt&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">adapt_method</span> <span class="o">=</span> <span class="s1">&#39;by_reso&#39;</span>
+
+    <span class="c1"># Custom target resolution to reach (optional). The final resolution will be the lowest between this custom resolution,</span>
+    <span class="c1"># the resolution of the data, and the resolution of the models, for each wavelength.</span>
+    <span class="c1"># Format : float or &#39;NA&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">custom_reso</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+
+    <span class="c1"># Continuum subtraction. If a float is given, the value will give the approximated spectral resolution of the continuum or the size of the Sav_Gol</span>
+    <span class="c1"># windows if the option continuum_sub_method is set to &quot;Sav-Gol&quot;. Format : &#39;float&#39; or &#39;NA&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">continuum_sub</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+
+    <span class="c1"># Wavelength range used for the estimate of the continuum (separated windows can be defined).</span>
+    <span class="c1"># Format : &#39;window1_max / window2_min,window2_max / ... / windown_min&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">wav_for_continuum</span> <span class="o">=</span> <span class="s1">&#39;0.9,2.4&#39;</span>
+
+    <span class="c1"># Whether to use least square to estimate planetary and stellar contributions</span>
+    <span class="c1"># Format : &#39;True&#39; or &#39;False&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">use_lsqr</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_inversion</span><span class="p">]</span>
+
+    <span class="c1"># Method to calculate the loglikelihood function used in the nested sampling procedure</span>
+    <span class="c1"># Please refer to the documentation on &#39;nested_logL_functions.py&#39; for more information</span>
+    <span class="c1"># Format : &#39;chi2_classic&#39; or &#39;chi2_covariance&#39; or &#39;chi2_extended&#39; or &#39;chi2_extended_covariance&#39; or &#39;CCF_Brogi&#39; or &#39;CCF_Zucker&#39; or &#39;CCF_custom&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">logL_type</span> <span class="o">=</span> <span class="s1">&#39;chi2_classic&#39;</span>
+
+    <span class="c1"># Wavelength range used for the fit during the nested sampling procedure (separated windows can be defined).</span>
+    <span class="c1"># Format : &#39;window1_min,window1_max / window2_min,window2_max / ... / windown_min,windown_max&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">wav_fit</span> <span class="o">=</span> <span class="s1">&#39;0.9,2.4&#39;</span>
+
+    <span class="c1"># Nested sampling algorithm used.</span>
+    <span class="c1"># Format : &#39;nestle&#39; or &#39;pymultinest&#39; or &#39;ultranest&#39; or &#39;dynesty&#39; (only nestle and pymultinest at the moment)</span>
+    <span class="n">ns_algo</span> <span class="o">=</span> <span class="s1">&#39;nestle&#39;</span>
+
+    <span class="c1"># Number of living points during the nested sampling procedure.</span>
+    <span class="c1"># Format : &#39;integer&#39;</span>
+    <span class="n">npoint</span> <span class="o">=</span> <span class="s1">&#39;50&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_parameter</span><span class="p">]</span>
+    <span class="c1"># Definition of the prior function of each parameter explored by the grid. Please refer to the documentation to check</span>
+    <span class="c1"># the parameter space explore by each grid.</span>
+    <span class="c1"># Format : &quot;function&quot;, function_param1, function_param2</span>
+    <span class="c1"># Example : &quot;uniform&quot;, min, max</span>
+    <span class="c1">#           &quot;constant&quot;, value</span>
+    <span class="c1">#           &quot;gaussian&quot;, mu, sigma</span>
+    <span class="c1">#           &#39;NA&#39; if the grid cover a lower number of parameters</span>
+    <span class="n">par1</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">2000</span> <span class="c1"># Teff</span>
+    <span class="n">par2</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.0</span> <span class="c1"># log(g)</span>
+    <span class="n">par3</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span> <span class="c1"># [M/H]</span>
+    <span class="n">par4</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span> <span class="c1"># C/O</span>
+    <span class="n">par5</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+
+    <span class="c1"># Definition of the prior function of each extra-grid parameter. r is the radius (RJup, &gt;0), d is the distance (pc, &gt;0),</span>
+    <span class="c1"># alpha is a scaling factor applied to the model flux, rv is the radial velocity (km.s-1), av is the extinction (mag),</span>
+    <span class="c1"># vsini is the projected rotational velocity (km.s-1, &gt;0), ld is the limb darkening (0-1), bb_T is the black-body temperature (K)</span>
+    <span class="c1"># and bb_R is the black-body radius (Rjup)</span>
+    <span class="c1"># Format : &quot;function&quot;, function_param1, function_param2</span>
+    <span class="c1"># Example : &quot;uniform&quot;, min, max</span>
+    <span class="c1">#           &quot;constant&quot;, value</span>
+    <span class="c1">#           &quot;gaussian&quot;, mu, sigma</span>
+    <span class="c1">#           &#39;NA&#39; if you do not want to constrain this parameter</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">rv</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span>
+    <span class="n">av</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">vsini</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">ld</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">bb_T</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">bb_R</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_nestle</span><span class="p">]</span>
+    <span class="c1"># For details on these parameters, please see: http://kylebarbary.com/nestle/index.html</span>
+
+    <span class="n">mechanic</span> <span class="o">=</span> <span class="s1">&#39;static&#39;</span>     <span class="c1"># Sampler “super-classes” of dynesty</span>
+    <span class="c1"># e.g. &#39;static&#39; / &#39;dynamic&#39; # the number of living point is fixed / variates</span>
+
+    <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;multi&#39;</span>        <span class="c1"># Reduction of the parameters space</span>
+    <span class="c1"># e.g. &#39;single&#39; / &#39;multi&#39; #single-ellipsoidal / multi-ellipsoidal</span>
+
+    <span class="n">maxiter</span> <span class="o">=</span> <span class="kc">None</span>          <span class="c1"># Stopping criterions</span>
+    <span class="n">maxcall</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dlogz</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">decline_factor</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="n">update_interval</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Divers</span>
+    <span class="n">npdim</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rstate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">callback</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="p">[</span><span class="n">config_pymultinest</span><span class="p">]</span>
+    <span class="c1"># For details on these parameters, please see: https://github.com/JohannesBuchner/PyMultiNest</span>
+
+    <span class="n">n_clustering_params</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">wrapped_params</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">importance_nested_sampling</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">multimodal</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">const_efficiency_mode</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">evidence_tolerance</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">sampling_efficiency</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">n_iter_before_update</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">null_log_evidence</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e90</span>
+    <span class="n">max_modes</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">mode_tolerance</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e90</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">write_output</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">log_zero</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e100</span>
+    <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">init_MPI</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">dump_callback</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">use_MPI</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-cyan-fg">  Cell </span><span class="ansi-green-fg">In[1], line 3</span>
+<span class="ansi-red-fg">    observation_path = &#39;~/YOUR/PATH/formosa_desk/inversion_targetname/inputs/data.fits&#39;</span>
+    ^
+<span class="ansi-red-fg">IndentationError</span><span class="ansi-red-fg">:</span> unexpected indent
+
+</pre></div></div>
+</div>
+</section>
+<section id="Multiple-observations">
+<h2>Multiple observations<a class="headerlink" href="#Multiple-observations" title="Link to this heading"></a></h2>
+<p>Now, if, in addition to your GPI spectrum, you want to add another observation, for example from <a class="reference external" href="https://arxiv.org/pdf/2303.13469">JWST/MIRI</a> spaning 4.9-27.9 μm at a spectral resolution of R~2000, you should have two data files: <code class="docutils literal notranslate"><span class="pre">GPI_data.fits</span></code> and <code class="docutils literal notranslate"><span class="pre">MIRI_data.fits</span></code></p>
+<p>These two <code class="docutils literal notranslate"><span class="pre">.fits</span></code> should be placed in <code class="docutils literal notranslate"><span class="pre">~/YOUR/PATH/formosa_desk/inversion_targetname/inputs/</span></code></p>
+<p>Then the config file should look like :</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">config_path</span><span class="p">]</span>
+    <span class="c1"># Path to the observed spectrum file</span>
+    <span class="n">observation_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/inputs/&#39;</span> <span class="c1"># /!\ NOW YOU NEED TO SPECIFY THE FOLDER WHERE THE TWO .FITS ARE /!\</span>
+
+    <span class="c1"># Path to store your interpolated grid</span>
+    <span class="n">adapt_store_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/adapted_grid/&#39;</span>
+
+    <span class="c1"># Path where you wish to store your results.</span>
+    <span class="n">result_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/adapted_grid/outputs/&#39;</span>
+
+    <span class="c1"># Path of your initial grid of models</span>
+    <span class="n">model_path</span> <span class="o">=</span> <span class="s1">&#39;~/YOUR/PATH/formosa_desk/inversion_targetname/adapted_grid/model.nc&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_adapt</span><span class="p">]</span>
+    <span class="c1"># Wavelength range used for the extraction of data and adaptation of the grid (separated windows can be defined).</span>
+    <span class="c1"># Format : &#39;window1_min,window1_max / window2_min,window2_max / ... / windown_min,windown_max&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">wav_for_adapt</span> <span class="o">=</span> <span class="s1">&#39;0.9,2.4&#39;</span><span class="p">,</span> <span class="s1">&#39;4.9,27.9&#39;</span>
+
+    <span class="c1"># Method used to adapt the synthetic spectra to the data.</span>
+    <span class="c1"># example : &#39;by_reso&#39; : A Gaussian law is convolved to the spectrum to decrease the resolution as a function of the</span>
+    <span class="c1"># wavelength.</span>
+    <span class="c1">#           &#39;by_sample&#39; : The spectrum is directly re-sampled to the wavelength grid of the data, using the module</span>
+    <span class="c1"># python spectres.</span>
+    <span class="c1"># Format : &#39;by_reso&#39; or &#39;by_adapt&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">adapt_method</span> <span class="o">=</span> <span class="s1">&#39;by_reso&#39;</span><span class="p">,</span> <span class="s1">&#39;by_reso&#39;</span>
+
+    <span class="c1"># Custom target resolution to reach (optional). The final resolution will be the lowest between this custom resolution,</span>
+    <span class="c1"># the resolution of the data, and the resolution of the models, for each wavelength.</span>
+    <span class="c1"># Format : float or &#39;NA&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">custom_reso</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span>
+
+    <span class="c1"># Continuum subtraction. If a float is given, the value will give the approximated spectral resolution of the continuum or the size of the Sav_Gol</span>
+    <span class="c1"># windows if the option continuum_sub_method is set to &quot;Sav-Gol&quot;. Format : &#39;float&#39; or &#39;NA&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">continuum_sub</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span>
+
+    <span class="c1"># Wavelength range used for the estimate of the continuum (separated windows can be defined).</span>
+    <span class="c1"># Format : &#39;window1_max / window2_min,window2_max / ... / windown_min&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">wav_for_continuum</span> <span class="o">=</span> <span class="s1">&#39;0.9,2.4&#39;</span><span class="p">,</span> <span class="s1">&#39;4.9,27.9&#39;</span>
+
+    <span class="c1"># Whether to use least square to estimate planetary and stellar contributions</span>
+    <span class="c1"># Format : &#39;True&#39; or &#39;False&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">use_lsqr</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span><span class="p">,</span> <span class="s1">&#39;False&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_inversion</span><span class="p">]</span>
+
+    <span class="c1"># Method to calculate the loglikelihood function used in the nested sampling procedure</span>
+    <span class="c1"># Please refer to the documentation on &#39;nested_logL_functions.py&#39; for more information</span>
+    <span class="c1"># Format : &#39;chi2_classic&#39; or &#39;chi2_covariance&#39; or &#39;chi2_extended&#39; or &#39;chi2_extended_covariance&#39; or &#39;CCF_Brogi&#39; or &#39;CCF_Zucker&#39; or &#39;CCF_custom&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">logL_type</span> <span class="o">=</span> <span class="s1">&#39;chi2_classic&#39;</span><span class="p">,</span> <span class="s1">&#39;chi2_classic&#39;</span>
+
+    <span class="c1"># Wavelength range used for the fit during the nested sampling procedure (separated windows can be defined).</span>
+    <span class="c1"># Format : &#39;window1_min,window1_max / window2_min,window2_max / ... / windown_min,windown_max&#39;</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">wav_fit</span> <span class="o">=</span> <span class="s1">&#39;0.9,2.4&#39;</span><span class="p">,</span> <span class="s1">&#39;4.9,27.9&#39;</span>
+
+    <span class="c1"># Nested sampling algorithm used.</span>
+    <span class="c1"># Format : &#39;nestle&#39; or &#39;pymultinest&#39; or &#39;ultranest&#39; or &#39;dynesty&#39; (only nestle and pymultinest at the moment)</span>
+    <span class="n">ns_algo</span> <span class="o">=</span> <span class="s1">&#39;pymultinest&#39;</span>
+
+    <span class="c1"># Number of living points during the nested sampling procedure.</span>
+    <span class="c1"># Format : &#39;integer&#39;</span>
+    <span class="n">npoint</span> <span class="o">=</span> <span class="s1">&#39;50&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_parameter</span><span class="p">]</span>
+    <span class="c1"># Definition of the prior function of each parameter explored by the grid. Please refer to the documentation to check</span>
+    <span class="c1"># the parameter space explore by each grid.</span>
+    <span class="c1"># Format : &quot;function&quot;, function_param1, function_param2</span>
+    <span class="c1"># Example : &quot;uniform&quot;, min, max</span>
+    <span class="c1">#           &quot;constant&quot;, value</span>
+    <span class="c1">#           &quot;gaussian&quot;, mu, sigma</span>
+    <span class="c1">#           &#39;NA&#39; if the grid cover a lower number of parameters</span>
+    <span class="n">par1</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">2000</span> <span class="c1"># Teff</span>
+    <span class="n">par2</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.0</span> <span class="c1"># log(g)</span>
+    <span class="n">par3</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span> <span class="c1"># [M/H]</span>
+    <span class="n">par4</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span> <span class="c1"># C/O</span>
+    <span class="n">par5</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+
+    <span class="c1"># Definition of the prior function of each extra-grid parameter. r is the radius (RJup, &gt;0), d is the distance (pc, &gt;0),</span>
+    <span class="c1"># alpha is a scaling factor applied to the model flux, rv is the radial velocity (km.s-1), av is the extinction (mag),</span>
+    <span class="c1"># vsini is the projected rotational velocity (km.s-1, &gt;0), ld is the limb darkening (0-1), bb_T is the black-body temperature (K)</span>
+    <span class="c1"># and bb_R is the black-body radius (Rjup)</span>
+    <span class="c1"># Format : &quot;function&quot;, function_param1, function_param2</span>
+    <span class="c1"># Example : &quot;uniform&quot;, min, max</span>
+    <span class="c1">#           &quot;constant&quot;, value</span>
+    <span class="c1">#           &quot;gaussian&quot;, mu, sigma</span>
+    <span class="c1">#           &#39;NA&#39; if you do not want to constrain this parameter</span>
+    <span class="c1"># WARNING : need to define separatly when MOSAIC</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">rv</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span>
+    <span class="n">av</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">vsini</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;Accruate&#39;</span>
+    <span class="n">ld</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">bb_T</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="n">bb_R</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+
+
+<span class="p">[</span><span class="n">config_nestle</span><span class="p">]</span>
+    <span class="c1"># For details on these parameters, please see: http://kylebarbary.com/nestle/index.html</span>
+
+    <span class="n">mechanic</span> <span class="o">=</span> <span class="s1">&#39;static&#39;</span>     <span class="c1"># Sampler “super-classes” of dynesty</span>
+    <span class="c1"># e.g. &#39;static&#39; / &#39;dynamic&#39; # the number of living point is fixed / variates</span>
+
+    <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;multi&#39;</span>        <span class="c1"># Reduction of the parameters space</span>
+    <span class="c1"># e.g. &#39;single&#39; / &#39;multi&#39; #single-ellipsoidal / multi-ellipsoidal</span>
+
+    <span class="n">maxiter</span> <span class="o">=</span> <span class="kc">None</span>          <span class="c1"># Stopping criterions</span>
+    <span class="n">maxcall</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dlogz</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">decline_factor</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="n">update_interval</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Divers</span>
+    <span class="n">npdim</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rstate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">callback</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="p">[</span><span class="n">config_pymultinest</span><span class="p">]</span>
+    <span class="c1"># For details on these parameters, please see: https://github.com/JohannesBuchner/PyMultiNest</span>
+
+    <span class="n">n_clustering_params</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">wrapped_params</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">importance_nested_sampling</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">multimodal</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">const_efficiency_mode</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">evidence_tolerance</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">sampling_efficiency</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">n_iter_before_update</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">null_log_evidence</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e90</span>
+    <span class="n">max_modes</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">mode_tolerance</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e90</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">write_output</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">log_zero</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e100</span>
+    <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">init_MPI</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">dump_callback</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">use_MPI</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-cyan-fg">  Cell </span><span class="ansi-green-fg">In[2], line 3</span>
+<span class="ansi-red-fg">    observation_path = &#39;~/YOUR/PATH/formosa_desk/inversion_targetname/inputs/&#39; # /!\ NOW YOU NEED TO SPECIFY THE FOLDER WHERE THE TWO .FITS ARE /!\</span>
+    ^
+<span class="ansi-red-fg">IndentationError</span><span class="ansi-red-fg">:</span> unexpected indent
+
+</pre></div></div>
+</div>
+<section id="Extra-grid-parameters">
+<h3>Extra-grid parameters<a class="headerlink" href="#Extra-grid-parameters" title="Link to this heading"></a></h3>
+<p>In <code class="docutils literal notranslate"><span class="pre">[config_parameter]</span></code>, you need to define both the grid (see grid tutorial) and extra-grid parameters. Let’s go through them one by one to see how you can use them.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">r</span></code> = radius in Rjup</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : You need to define both <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> so ForMoSA can compute an analytical scaling factor <code class="docutils literal notranslate"><span class="pre">ck=(r/d)²</span></code>. This parameter can only be defined once.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d</span></code> = distance in pc</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : You need to define both <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> so ForMoSA can compute an analytical scaling factor <code class="docutils literal notranslate"><span class="pre">ck=(r/d)²</span></code>. This parameter can only be defined once.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> = scaling parameter</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : You need to define both <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> so ForMoSA can compute an analytical scaling factor <code class="docutils literal notranslate"><span class="pre">ck=alpha*(r/d)²</span></code>. By default <code class="docutils literal notranslate"><span class="pre">alpha=1</span></code>. You can define multiple <code class="docutils literal notranslate"><span class="pre">alpha</span></code> if you have more than one observation, i.e. <code class="docutils literal notranslate"><span class="pre">'prior_1',</span> <span class="pre">value1_1,</span> <span class="pre">value2_1,</span> <span class="pre">'prior_2',</span> <span class="pre">value1_2,</span> <span class="pre">value2_2,</span> <span class="pre">...</span></code>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rv</span></code> = radial velocity in km.s⁻¹</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : You can define multiple <code class="docutils literal notranslate"><span class="pre">rv</span></code> if you have more than one observation, i.e. <code class="docutils literal notranslate"><span class="pre">'prior_1',</span> <span class="pre">value1_1,</span> <span class="pre">value2_1,</span> <span class="pre">'prior_2',</span> <span class="pre">value1_2,</span> <span class="pre">value2_2,</span> <span class="pre">...</span></code>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">av</span></code> = extinction in mag</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : This parameter can only be defined once.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vsini</span></code> = rotational velocity in km.s⁻¹</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2,</span> <span class="pre">'method'</span></code></p>
+<p>comments : You need to define both <code class="docutils literal notranslate"><span class="pre">vsini</span></code> and <code class="docutils literal notranslate"><span class="pre">ld</span></code> so ForMoSA can compute the broadning. You also need to specify a fourth parameter <code class="docutils literal notranslate"><span class="pre">'method'</span></code>, to choose how you want to compute the broadening. <code class="docutils literal notranslate"><span class="pre">'method'='FastRotBroad'</span></code> and <code class="docutils literal notranslate"><span class="pre">'method'='RotBroad'</span></code> both uses the classical line broadning function extinction.fm07 in fast and slow modes, respectively. <code class="docutils literal notranslate"><span class="pre">'method'='Accurate'</span></code> uses the formula from <a class="reference external" href="https://arxiv.org/pdf/2305.09693">Carvalho &amp; Johns-Krull 2023</a>. You can define multiple
+<code class="docutils literal notranslate"><span class="pre">vsini</span></code> if you have more than one observation, i.e. <code class="docutils literal notranslate"><span class="pre">'prior_1',</span> <span class="pre">value1_1,</span> <span class="pre">value2_1,</span> <span class="pre">'method_1',</span> <span class="pre">'prior_2',</span> <span class="pre">value1_2,</span> <span class="pre">value2_2,</span> <span class="pre">'method_2',</span> <span class="pre">...</span></code>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ld</span></code> = limb-darkening</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : You need to define both <code class="docutils literal notranslate"><span class="pre">vsini</span></code> and <code class="docutils literal notranslate"><span class="pre">ld</span></code> so ForMoSA can compute the broadning. You can define multiple <code class="docutils literal notranslate"><span class="pre">ld</span></code> if you have more than one observation, i.e. <code class="docutils literal notranslate"><span class="pre">'prior_1',</span> <span class="pre">value1_1,</span> <span class="pre">value2_1,</span> <span class="pre">'prior_2',</span> <span class="pre">value1_2,</span> <span class="pre">value2_2,</span> <span class="pre">...</span></code>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bb_T</span></code> = black-body temperature in K</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : This parameter can only be defined once.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bb_R</span></code> = black-body radius in Rjup</p>
+<p>format : <code class="docutils literal notranslate"><span class="pre">'NA'</span></code> or <code class="docutils literal notranslate"><span class="pre">'prior',</span> <span class="pre">value1,</span> <span class="pre">value2</span></code></p>
+<p>comments : This parameter can only be defined once.</p>
+</li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="exorem_info.html" class="btn btn-neutral float-left" title="Exo-REM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="demoabpic.html" class="btn btn-neutral float-right" title="Demo AB Pic b" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Simon Petrus, Paulina Palma-Bifani, Matthieu Ravet, Allan Denis, Mickaël Bonnefoy and Gaël Chauvin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
