@@ -161,7 +161,7 @@ def calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro, flx_obs_photo, er
     if analytic == 'no':
         r_picked *= u.Rjup
         d_picked *= u.pc
-        ck = alpha * (r_picked.value/d_picked.value)**2
+        ck = alpha * (r_picked.to(u.m).value/d_picked.to(u.m).value)**2
     # Calculation of the dilution factor ck analytically
     else:
         if len(flx_obs_spectro) != 0:
