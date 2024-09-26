@@ -391,3 +391,19 @@ Comments:
       
 Tests tha have been done to checkup the changes:
      - High resolution datasets (HiRISE, CRIRES)
+
+
+- - -
+
+26/09/2024
+
+Matthieu Ravet
+
+Comments:
+      - Updating / correting the readthedocs
+      - Correction of the rv input loop if you want to set it to constant during the ns
+      - Correction of the plotting function (for constant extra grid and for the custom resolution grid)
+      
+
+Tests tha have been done to checkup the changes:
+     - Test with constant priors on the rv

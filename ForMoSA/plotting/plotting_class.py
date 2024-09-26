@@ -272,7 +272,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[2][1] + fr'$_{indobs}$' + ' ' + extra_parameters[2][2])
                     theta_index.append(f'alpha_{indobs}')
         else: # If you want 1 common alpha for all observations
-            if self.global_params.alpha != 'NA' and self.global_params.alpha != 'constant':
+            if self.global_params.alpha != 'NA' and self.global_params.alpha[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[2][1] + ' ' + extra_parameters[2][2])
                 theta_index.append('alpha')
         if len(self.global_params.rv) > 3: # If you want separate rv for each observations
@@ -282,7 +282,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[3][1] + fr'$_{indobs}$' + ' ' + extra_parameters[3][2])
                     theta_index.append(f'rv_{indobs}')
         else: # If you want 1 common rv for all observations
-            if self.global_params.rv != 'NA' and self.global_params.rv != 'constant':
+            if self.global_params.rv != 'NA' and self.global_params.rv[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[3][1] + ' ' + extra_parameters[3][2])
                 theta_index.append('rv')
         if len(self.global_params.vsini) > 4: # If you want separate vsini for each observations
@@ -292,7 +292,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[5][1] + fr'$_{indobs}$' + ' ' + extra_parameters[5][2])
                     theta_index.append(f'vsini_{indobs}')
         else: # If you want 1 common vsini for all observations
-            if self.global_params.vsini != 'NA' and self.global_params.vsini != 'constant':
+            if self.global_params.vsini != 'NA' and self.global_params.vsini[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[5][1] + ' ' + extra_parameters[5][2])
                 theta_index.append('vsini')
         if len(self.global_params.ld) > 3: # If you want separate ld for each observations
@@ -302,7 +302,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[6][1] + fr'$_{indobs}$' + ' ' + extra_parameters[6][2])
                     theta_index.append(f'ld_{indobs}')
         else: # If you want 1 common vsini for all observations
-            if self.global_params.ld != 'NA' and self.global_params.ld != 'constant':
+            if self.global_params.ld != 'NA' and self.global_params.ld[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[6][1] + ' ' + extra_parameters[6][2])
                 theta_index.append('ld')
 

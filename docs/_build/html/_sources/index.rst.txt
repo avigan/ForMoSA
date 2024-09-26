@@ -8,8 +8,8 @@
    <br />
 
 .. image:: ForMoSA.png
-   :width: 150px
-   :height: 105px
+   :width: 300px
+   :height: 300px
    :align: center
 
 Forward Modeling Tool for Spectral Analysis

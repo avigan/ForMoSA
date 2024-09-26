@@ -448,7 +448,7 @@ def modif_spec(global_params, theta, theta_index,
         else: # If you want 1 common rv for all observations
             if global_params.rv != "NA":
                 if global_params.rv[0] == "constant":
-                    alpha_picked = float(global_params.rv[1])
+                    rv_picked = float(global_params.rv[1])
                 else:
                     ind_theta_rv = np.where(theta_index == 'rv')
                     rv_picked = theta[ind_theta_rv[0][0]]

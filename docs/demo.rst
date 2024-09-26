@@ -27,7 +27,7 @@ Follow the :doc:`installation`
 Observation(s)
 +++++++++++++++++
 
-First, you need to format the observation you wish to invert in a .fits file. It should have the following extensions:
+First, you need to format the observation you wish to invert in a ``.fits`` file. It should have the following extensions:
 
 * **'WAV'**
 * **'FLX'** 
@@ -35,7 +35,7 @@ First, you need to format the observation you wish to invert in a .fits file. It
 * **'RES'** 
 * **'INS'** 
 
-If you wish to invert on multiple observations, we recommend that you define separate files (data_1.fits, data_2.fits, ect...)
+If you wish to invert on multiple observations, we recommend that you define separate files (``data_1.fits``, ``data_2.fits``, ect...)
 
 Ideally, save it/them inside the ``inputs/`` subdirectory.
 
