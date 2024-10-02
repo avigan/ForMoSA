@@ -195,19 +195,17 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     print()
     for key_ind, key in enumerate(attr['key']):
         print(str(key_ind+1) + '/' + str(len(attr['key'])))
-        ds_spectro_new = ds_spectro_new.interpolate_na(dim=key, method="linear", fill_value="extrapolate", limit=None,
-                                       max_gap=None)
-        ds_photo_new = ds_photo_new.interpolate_na(dim=key, method="linear", fill_value="extrapolate", limit=None,
-                                                 max_gap=None)
+        ds_spectro_new = ds_spectro_new.interpolate_na(dim=key, method="linear", fill_value="extrapolate", limit=None, max_gap=None)
+        ds_photo_new = ds_photo_new.interpolate_na(dim=key, method="linear", fill_value="extrapolate", limit=None, max_gap=None)
 
     ds_spectro_new.to_netcdf(os.path.join(global_params.adapt_store_path, f'adapted_grid_spectro_{global_params.grid_name}_{obs_name}_nonan.nc'),
-                    format='NETCDF4',
-                    engine='netcdf4',
-                    mode='w')
+                             format='NETCDF4',
+                             engine='netcdf4',
+                             mode='w')
     ds_photo_new.to_netcdf(os.path.join(global_params.adapt_store_path, f'adapted_grid_photo_{global_params.grid_name}_{obs_name}_nonan.nc'),
-                        format='NETCDF4',
-                        engine='netcdf4',
-                        mode='w')
+                           format='NETCDF4',
+                           engine='netcdf4',
+                           mode='w')
 
     print('The possible holes have been interpolated!')
 
