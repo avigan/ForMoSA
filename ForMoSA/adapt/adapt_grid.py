@@ -177,64 +177,18 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
                 print(line_up, end=line_clear)
                 i_tot += 1
 
-    if len(attr['par']) == 2:
-        ds_spectro_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2"], grid_spectro_np)),
-                            coords={"wavelength": wav_obs_spectro,
-                                    "par1": grid["par1"].values,
-                                    "par2": grid["par2"].values},
-                            attrs=attr)
-        ds_photo_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2"], grid_photo_np)),
-                                 coords={"wavelength": wav_obs_photo,
-                                         "par1": grid["par1"].values,
-                                         "par2": grid["par2"].values},
-                                 attrs=attr)
-    elif len(attr['par']) == 3:
-        ds_spectro_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2", "par3"], grid_spectro_np)),
-                            coords={"wavelength": wav_obs_spectro,
-                                    "par1": grid["par1"].values,
-                                    "par2": grid["par2"].values,
-                                    "par3": grid["par3"].values},
-                            attrs=attr)
-        ds_photo_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2", "par3"], grid_photo_np)),
-                                 coords={"wavelength": wav_obs_photo,
-                                         "par1": grid["par1"].values,
-                                         "par2": grid["par2"].values,
-                                         "par3": grid["par3"].values},
-                                 attrs=attr)
-    elif len(attr['par']) == 4:
-        ds_spectro_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2", "par3", "par4"], grid_spectro_np)),
-                            coords={"wavelength": wav_obs_spectro,
-                                    "par1": grid["par1"].values,
-                                    "par2": grid["par2"].values,
-                                    "par3": grid["par3"].values,
-                                    "par4": grid["par4"].values},
-                            attrs=attr)
-        ds_photo_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2", "par3", "par4"],
-                                                      grid_photo_np)),
-                                 coords={"wavelength": wav_obs_photo,
-                                         "par1": grid["par1"].values,
-                                         "par2": grid["par2"].values,
-                                         "par3": grid["par3"].values,
-                                         "par4": grid["par4"].values},
-                                 attrs=attr)
-    elif len(attr['par']) == 5:
-        ds_spectro_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2", "par3", "par4", "par5"], grid_spectro_np)),
-                            coords={"wavelength": wav_obs_spectro,
-                                    "par1": grid["par1"].values,
-                                    "par2": grid["par2"].values,
-                                    "par3": grid["par3"].values,
-                                    "par4": grid["par4"].values,
-                                    "par5": grid["par5"].values},
-                            attrs=attr)
-        ds_photo_new = xr.Dataset(data_vars=dict(grid=(["wavelength", "par1", "par2", "par3", "par4", "par5"],
-                                                      grid_photo_np)),
-                                 coords={"wavelength": wav_obs_photo,
-                                         "par1": grid["par1"].values,
-                                         "par2": grid["par2"].values,
-                                         "par3": grid["par3"].values,
-                                         "par4": grid["par4"].values,
-                                         "par5": grid["par5"].values},
-                                 attrs=attr)
+    # create final datasets
+    vars = ["wavelength"]
+    for key in attr['key']:
+        vars.append(key)
+
+    coords = {"wavelength": wav_obs_photo}
+    for key in attr['key']:
+        coords[key] = grid[key].values
+
+    ds_spectro_new = xr.Dataset(data_vars=dict(grid=(vars, grid_spectro_np)), coords=coords, attrs=attr)
+    ds_photo_new   = xr.Dataset(data_vars=dict(grid=(vars, grid_photo_np)), coords=coords, attrs=attr)
+
     print()
     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
     print('-> The possible holes in the grid are interpolated: ')
