@@ -21,18 +21,16 @@ def array_to_numpy(shared_array, shape, dtype):
 
     Parameters
     ----------
-    shared_array : RawArray
+    shared_array : mp.RawArray
         Raw shared array
-
     shape : tuple
         Shape of the array
-
     dtype : numpy dtype
         Data type of the array
 
     Returns
     -------
-    numpy_array : array
+    numpy_array : np.ndarray
         Numpy array mapped to shared array
     '''
     if shared_array is None:
@@ -47,7 +45,7 @@ def array_to_numpy(shared_array, shape, dtype):
 
 def tpool_adapt_init(grid_input_shape_i, grid_input_data_i, grid_spectro_shape_i, grid_spectro_data_i, grid_photo_shape_i, grid_photo_data_i):
     '''
-    Thread pool init function
+    Thread pool init function for the parallelisation process of adapt_model()
 
     This function initializes the global variables stored as shared arrays
     '''
@@ -64,6 +62,35 @@ def tpool_adapt_init(grid_input_shape_i, grid_input_data_i, grid_spectro_shape_i
 
 
 def tpool_adapt(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, indobs, keys, titles, values):
+    '''
+    Worker function for the parallelisation process of adapt_model()
+
+    Parameters
+    ----------
+    idx : tuple
+        Index of the current model
+    global_params : object
+        Class containing each parameter
+    wav_mod_nativ : np.ndarray
+        Wavelength of the input models
+    res_mod_obs_merge : ?
+        ?
+    obs_name : str
+        Name of the current observation looping
+    indobs : int
+        Index of the current observation loop
+    keys : list
+        Attribute keys
+    titles : list
+        Attribute title
+    values : dict
+        Values for each attribute
+
+    Author
+    ------
+    Arthur Vigan, LAM/CNRS
+    '''
+
     # global variables
     global grid_input_shape, grid_input_data, grid_spectro_shape, grid_spectro_data, grid_photo_shape, grid_photo_data
 
