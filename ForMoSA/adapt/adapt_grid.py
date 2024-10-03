@@ -4,6 +4,8 @@ import xarray as xr
 import time
 import os, sys
 
+from tqdm import tqdm
+
 sys.path.insert(0, os.path.abspath('../'))
 
 from adapt.extraction_functions import adapt_model, decoupe
@@ -49,133 +51,145 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     for par_t in attr['title']:
         follow_print_title += par_t + ' \t- \t'
 
-    for p1_i, p1 in enumerate(grid['par1'].values):
-        for p2_i, p2 in enumerate(grid['par2'].values):
-            if len(attr['par']) > 2:
-                for p3_i, p3 in enumerate(grid['par3'].values):
-                    if len(attr['par']) > 3:
-                        for p4_i, p4 in enumerate(grid['par4'].values):
-                            if len(attr['par']) > 4:
-                                for p5_i, p5 in enumerate(grid['par5'].values):
-                                    time1 = time.time()
-                                    model_to_adapt = grid_np[:, p1_i, p2_i, p3_i, p4_i, p5_i]
-                                    nan_mod_ind = ~np.isnan(model_to_adapt)
-                                    if len(np.where(nan_mod_ind is False)[0]) == 0:
-                                        mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
-                                                                                 res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
-                                        grid_spectro_np[:, p1_i, p2_i, p3_i, p4_i, p5_i] = mod_spectro
-                                        grid_photo_np[:, p1_i, p2_i, p3_i, p4_i, p5_i] = mod_photo
-                                    else:
-                                        print('The extraction of the model : '+attr['title'][0]+'=' + str(p1) +
-                                              ', '+attr['title'][1]+'=' + str(p2) +
-                                              ', '+attr['title'][2]+'=' + str(p3) +
-                                              ', '+attr['title'][3]+'=' + str(p4) +
-                                              ', '+attr['title'][4]+'=' + str(p5) +
-                                              '   failed')
+    shape = grid_np.shape
+    for idx in np.ndindex(shape[1:]):
+        model_to_adapt = grid_np[(..., ) + idx]
+        nan_mod_ind = np.isnan(model_to_adapt)
+        if np.any(nan_mod_ind):
+            continue
+        else:
+            mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
+                                                 res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
+            grid_spectro_np[(..., ) + idx] = mod_spectro
+            grid_photo_np[(..., ) + idx] = mod_photo
 
-                                    print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
-                                          str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
-                                          str(p3_i + 1) + '/' + str(len(grid['par3'].values)) + ' \t- \t' +
-                                          str(p4_i + 1) + '/' + str(len(grid['par4'].values)) + ' \t- \t' +
-                                          str(p5_i + 1) + '/' + str(len(grid['par5'].values)) + ' \t- \t' +
-                                          '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
-                                                                                      (time.time() - time1))[0])) +
-                                          'h : ' + str(int(decoupe((tot_par - i_tot) * (time.time() - time1))[1])) +
-                                          'm : ' + str(int(decoupe((tot_par - i_tot) * (time.time() - time1))[2])) +
-                                          's')
-                                    line_up = '\033[1A'
-                                    line_clear = '\x1b[2K'
-                                    print(line_up, end=line_clear)
-                                    i_tot += 1
-                            else:
-                                time1 = time.time()
-                                model_to_adapt = grid_np[:, p1_i, p2_i, p3_i, p4_i]
-                                nan_mod_ind = ~np.isnan(model_to_adapt)
-                                if len(np.where(nan_mod_ind is False)[0]) == 0:
-                                    mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
-                                                                             res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
+    # for p1_i, p1 in enumerate(grid['par1'].values):
+    #     for p2_i, p2 in enumerate(grid['par2'].values):
+    #         if len(attr['par']) > 2:
+    #             for p3_i, p3 in enumerate(grid['par3'].values):
+    #                 if len(attr['par']) > 3:
+    #                     for p4_i, p4 in enumerate(grid['par4'].values):
+    #                         if len(attr['par']) > 4:
+    #                             for p5_i, p5 in enumerate(grid['par5'].values):
+    #                                 time1 = time.time()
+    #                                 model_to_adapt = grid_np[:, p1_i, p2_i, p3_i, p4_i, p5_i]
+    #                                 nan_mod_ind = ~np.isnan(model_to_adapt)
+    #                                 if len(np.where(nan_mod_ind is False)[0]) == 0:
+    #                                     mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
+    #                                                                              res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
+    #                                     grid_spectro_np[:, p1_i, p2_i, p3_i, p4_i, p5_i] = mod_spectro
+    #                                     grid_photo_np[:, p1_i, p2_i, p3_i, p4_i, p5_i] = mod_photo
+    #                                 else:
+    #                                     print('The extraction of the model : '+attr['title'][0]+'=' + str(p1) +
+    #                                           ', '+attr['title'][1]+'=' + str(p2) +
+    #                                           ', '+attr['title'][2]+'=' + str(p3) +
+    #                                           ', '+attr['title'][3]+'=' + str(p4) +
+    #                                           ', '+attr['title'][4]+'=' + str(p5) +
+    #                                           '   failed')
 
-                                    grid_spectro_np[:, p1_i, p2_i, p3_i, p4_i] = mod_spectro
-                                    grid_photo_np[:, p1_i, p2_i, p3_i, p4_i] = mod_photo
-                                else:
-                                    print('The extraction of the model : ' + attr['title'][0] + '=' + str(p1) +
-                                          ', ' + attr['title'][1] + '=' + str(p2) +
-                                          ', ' + attr['title'][2] + '=' + str(p3) +
-                                          ', ' + attr['title'][3] + '=' + str(p4) +
-                                          '   failed')
+    #                                 print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
+    #                                       str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
+    #                                       str(p3_i + 1) + '/' + str(len(grid['par3'].values)) + ' \t- \t' +
+    #                                       str(p4_i + 1) + '/' + str(len(grid['par4'].values)) + ' \t- \t' +
+    #                                       str(p5_i + 1) + '/' + str(len(grid['par5'].values)) + ' \t- \t' +
+    #                                       '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                                                   (time.time() - time1))[0])) +
+    #                                       'h : ' + str(int(decoupe((tot_par - i_tot) * (time.time() - time1))[1])) +
+    #                                       'm : ' + str(int(decoupe((tot_par - i_tot) * (time.time() - time1))[2])) +
+    #                                       's')
+    #                                 line_up = '\033[1A'
+    #                                 line_clear = '\x1b[2K'
+    #                                 print(line_up, end=line_clear)
+    #                                 i_tot += 1
+    #                         else:
+    #                             time1 = time.time()
+    #                             model_to_adapt = grid_np[:, p1_i, p2_i, p3_i, p4_i]
+    #                             nan_mod_ind = ~np.isnan(model_to_adapt)
+    #                             if len(np.where(nan_mod_ind is False)[0]) == 0:
+    #                                 mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
+    #                                                                          res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
 
-                                print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
-                                      str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
-                                      str(p3_i + 1) + '/' + str(len(grid['par3'].values)) + ' \t- \t' +
-                                      str(p4_i + 1) + '/' + str(len(grid['par4'].values)) + ' \t- \t' +
-                                      '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
-                                                                                  (time.time() - time1))[0]))
-                                      + 'h : ' + str(int(decoupe((tot_par - i_tot) *
-                                                                 (time.time() - time1))[1]))
-                                      + 'm : ' + str(int(decoupe((tot_par - i_tot) *
-                                                                 (time.time() - time1))[2]))
-                                      + 's')
-                                line_up = '\033[1A'
-                                line_clear = '\x1b[2K'
-                                print(line_up, end=line_clear)
-                                i_tot += 1
-                    else:
-                        time1 = time.time()
-                        model_to_adapt = grid_np[:, p1_i, p2_i, p3_i]
-                        nan_mod_ind = ~np.isnan(model_to_adapt)
-                        if len(np.where(nan_mod_ind is False)[0]) == 0:
-                            mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
-                                                                   res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
+    #                                 grid_spectro_np[:, p1_i, p2_i, p3_i, p4_i] = mod_spectro
+    #                                 grid_photo_np[:, p1_i, p2_i, p3_i, p4_i] = mod_photo
+    #                             else:
+    #                                 print('The extraction of the model : ' + attr['title'][0] + '=' + str(p1) +
+    #                                       ', ' + attr['title'][1] + '=' + str(p2) +
+    #                                       ', ' + attr['title'][2] + '=' + str(p3) +
+    #                                       ', ' + attr['title'][3] + '=' + str(p4) +
+    #                                       '   failed')
 
-                            grid_spectro_np[:, p1_i, p2_i, p3_i] = mod_spectro
-                            grid_photo_np[:, p1_i, p2_i, p3_i] = mod_photo
-                        else:
-                            print('The extraction of the model : ' + attr['title'][0] + '=' + str(p1) +
-                                  ', ' + attr['title'][1] + '=' + str(p2) +
-                                  ', ' + attr['title'][2] + '=' + str(p3) +
-                                  '   failed')
+    #                             print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
+    #                                   str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
+    #                                   str(p3_i + 1) + '/' + str(len(grid['par3'].values)) + ' \t- \t' +
+    #                                   str(p4_i + 1) + '/' + str(len(grid['par4'].values)) + ' \t- \t' +
+    #                                   '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                                               (time.time() - time1))[0]))
+    #                                   + 'h : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                              (time.time() - time1))[1]))
+    #                                   + 'm : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                              (time.time() - time1))[2]))
+    #                                   + 's')
+    #                             line_up = '\033[1A'
+    #                             line_clear = '\x1b[2K'
+    #                             print(line_up, end=line_clear)
+    #                             i_tot += 1
+    #                 else:
+    #                     time1 = time.time()
+    #                     model_to_adapt = grid_np[:, p1_i, p2_i, p3_i]
+    #                     nan_mod_ind = ~np.isnan(model_to_adapt)
+    #                     if len(np.where(nan_mod_ind is False)[0]) == 0:
+    #                         mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
+    #                                                                res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
 
-                        print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
-                              str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
-                              str(p3_i + 1) + '/' + str(len(grid['par3'].values)) + ' \t- \t' +
-                              '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
-                                                                          (time.time() - time1))[0]))
-                              + 'h : ' + str(int(decoupe((tot_par - i_tot) *
-                                                         (time.time() - time1))[1]))
-                              + 'm : ' + str(int(decoupe((tot_par - i_tot) *
-                                                         (time.time() - time1))[2]))
-                              + 's')
-                        line_up = '\033[1A'
-                        line_clear = '\x1b[2K'
-                        print(line_up, end=line_clear)
-                        i_tot += 1
-            else:
-                time1 = time.time()
-                model_to_adapt = grid_np[:, p1_i, p2_i]
-                nan_mod_ind = ~np.isnan(model_to_adapt)
-                if len(np.where(nan_mod_ind is False)[0]) == 0:
-                    mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
-                                                             res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
-                    grid_spectro_np[:, p1_i, p2_i] = mod_spectro
-                    grid_photo_np[:, p1_i, p2_i] = mod_photo
-                else:
-                    print('The extraction of the model : ' + attr['title'][0] + '=' + str(p1) +
-                          ', ' + attr['title'][1] + '=' + str(p2) +
-                          '   failed')
+    #                         grid_spectro_np[:, p1_i, p2_i, p3_i] = mod_spectro
+    #                         grid_photo_np[:, p1_i, p2_i, p3_i] = mod_photo
+    #                     else:
+    #                         print('The extraction of the model : ' + attr['title'][0] + '=' + str(p1) +
+    #                               ', ' + attr['title'][1] + '=' + str(p2) +
+    #                               ', ' + attr['title'][2] + '=' + str(p3) +
+    #                               '   failed')
 
-                print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
-                      str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
-                      '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
-                                                                  (time.time() - time1))[0]))
-                      + 'h : ' + str(int(decoupe((tot_par - i_tot) *
-                                                 (time.time() - time1))[1]))
-                      + 'm : ' + str(int(decoupe((tot_par - i_tot) *
-                                                 (time.time() - time1))[2]))
-                      + 's')
-                line_up = '\033[1A'
-                line_clear = '\x1b[2K'
-                print(line_up, end=line_clear)
-                i_tot += 1
+    #                     print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
+    #                           str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
+    #                           str(p3_i + 1) + '/' + str(len(grid['par3'].values)) + ' \t- \t' +
+    #                           '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                                       (time.time() - time1))[0]))
+    #                           + 'h : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                      (time.time() - time1))[1]))
+    #                           + 'm : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                      (time.time() - time1))[2]))
+    #                           + 's')
+    #                     line_up = '\033[1A'
+    #                     line_clear = '\x1b[2K'
+    #                     print(line_up, end=line_clear)
+    #                     i_tot += 1
+    #         else:
+    #             time1 = time.time()
+    #             model_to_adapt = grid_np[:, p1_i, p2_i]
+    #             nan_mod_ind = ~np.isnan(model_to_adapt)
+    #             if len(np.where(nan_mod_ind is False)[0]) == 0:
+    #                 mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
+    #                                                          res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
+    #                 grid_spectro_np[:, p1_i, p2_i] = mod_spectro
+    #                 grid_photo_np[:, p1_i, p2_i] = mod_photo
+    #             else:
+    #                 print('The extraction of the model : ' + attr['title'][0] + '=' + str(p1) +
+    #                       ', ' + attr['title'][1] + '=' + str(p2) +
+    #                       '   failed')
+
+    #             print(str(p1_i + 1) + '/' + str(len(grid['par1'].values)) + ' \t- \t' +
+    #                   str(p2_i + 1) + '/' + str(len(grid['par2'].values)) + ' \t- \t' +
+    #                   '      Estimated time : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                                               (time.time() - time1))[0]))
+    #                   + 'h : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                              (time.time() - time1))[1]))
+    #                   + 'm : ' + str(int(decoupe((tot_par - i_tot) *
+    #                                              (time.time() - time1))[2]))
+    #                   + 's')
+    #             line_up = '\033[1A'
+    #             line_clear = '\x1b[2K'
+    #             print(line_up, end=line_clear)
+    #             i_tot += 1
 
     # create final datasets
     vars = ["wavelength"]
