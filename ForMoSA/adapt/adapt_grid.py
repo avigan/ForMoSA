@@ -51,8 +51,11 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     for par_t in attr['title']:
         follow_print_title += par_t + ' \t- \t'
 
-    shape = grid_np.shape
-    for idx in np.ndindex(shape[1:]):
+    shape = grid_np.shape[1:]
+    pbar = tqdm(total=np.prod(shape), leave=False)
+    for idx in np.ndindex(shape):
+        pbar.update()
+
         model_to_adapt = grid_np[(..., ) + idx]
         nan_mod_ind = np.isnan(model_to_adapt)
         if np.any(nan_mod_ind):
