@@ -122,6 +122,7 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
         wav_obs_photo     (array): Wavelengths of the photometry points
         obs_name            (str): Name of the current observation looping
         indobs              (int): Index of the current observation looping
+        parallel           (bool): Specify if parallelisation is used for adaptation
     Returns:
         None
 
