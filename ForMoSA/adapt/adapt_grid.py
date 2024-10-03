@@ -3,8 +3,11 @@ import numpy as np
 import xarray as xr
 import time
 import os, sys
+import ctypes
+import multiprocessing as mp
 
 from tqdm import tqdm
+from multiprocessing.pool import ThreadPool
 
 sys.path.insert(0, os.path.abspath('../'))
 
@@ -12,9 +15,77 @@ from adapt.extraction_functions import adapt_model, decoupe
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+def array_to_numpy(shared_array, shape, dtype):
+    '''
+    Return a numpy array from a shared array
+
+    Parameters
+    ----------
+    shared_array : RawArray
+        Raw shared array
+
+    shape : tuple
+        Shape of the array
+
+    dtype : numpy dtype
+        Data type of the array
+
+    Returns
+    -------
+    numpy_array : array
+        Numpy array mapped to shared array
+    '''
+    if shared_array is None:
+        return None
+
+    numpy_array = np.frombuffer(shared_array, dtype=dtype)
+    if shape is not None:
+        numpy_array.shape = shape
+
+    return numpy_array
 
 
-def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge, obs_name='', indobs=0):
+def tpool_adapt_init(grid_input_shape_i, grid_input_data_i, grid_spectro_shape_i, grid_spectro_data_i, grid_photo_shape_i, grid_photo_data_i):
+    '''
+    Thread pool init function
+
+    This function initializes the global variables stored as shared arrays
+    '''
+
+    # global variables
+    global grid_input_shape, grid_input_data, grid_spectro_shape, grid_spectro_data, grid_photo_shape, grid_photo_data
+
+    grid_input_shape   = grid_input_shape_i
+    grid_input_data    = grid_input_data_i
+    grid_spectro_shape = grid_spectro_shape_i
+    grid_spectro_data  = grid_spectro_data_i
+    grid_photo_shape   = grid_photo_shape_i
+    grid_photo_data    = grid_photo_data_i
+
+
+def tpool_adapt(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, indobs, keys, titles, values):
+    # global variables
+    global grid_input_shape, grid_input_data, grid_spectro_shape, grid_spectro_data, grid_photo_shape, grid_photo_data
+
+    grid_input   = array_to_numpy(grid_input_data, grid_input_shape, float)
+    grid_spectro = array_to_numpy(grid_spectro_data, grid_spectro_shape, float)
+    grid_photo   = array_to_numpy(grid_photo_data, grid_photo_shape, float)
+
+    model_to_adapt = grid_input[(..., ) + idx]
+    nan_mod = np.isnan(model_to_adapt)
+
+    if np.any(nan_mod):
+        msg = 'Extraction of model failed : '
+        for i, (key, title) in enumerate(zip(keys, titles)):
+            msg += f'{title}={values[key][idx[i]]}, '
+        print(msg)
+    else:
+        mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt, res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
+        grid_spectro[(..., ) + idx] = mod_spectro
+        grid_photo[(..., ) + idx]   = mod_photo
+
+
+def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge, obs_name='', indobs=0, parallel=True):
     """
     Adapt the synthetic spectra of a grid to make them comparable with the data.
 
@@ -39,31 +110,57 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     # create arrays without any assumptions on the number of parameters
     shape_spectro = [len(wav_obs_spectro)]
     shape_photo = [len(wav_obs_photo)]
+    values = {}
     for key in attr['key']:
         shape_spectro.append(len(grid[key].values))
         shape_photo.append(len(grid[key].values))
-    grid_spectro_np = np.full(shape_spectro, np.nan)
-    grid_photo_np   = np.full(shape_photo, np.nan)
+        values[key] = grid[key].values
 
     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
 
-    shape = grid_np.shape[1:]
+    #
+    # Shared arrays of image intensities at all wavelengths
+    #
+
+    grid_input_shape   = grid_np.shape
+    grid_input_data    = mp.RawArray(ctypes.c_double, int(np.prod(grid_input_shape)))
+    grid_input_np      = array_to_numpy(grid_input_data, grid_input_shape, float)
+    grid_input_np[:]   = grid_np
+    del grid_np
+
+    grid_spectro_shape = shape_spectro
+    grid_spectro_data  = mp.RawArray(ctypes.c_double, int(np.prod(grid_spectro_shape)))
+    grid_spectro_np    = array_to_numpy(grid_spectro_data, grid_spectro_shape, float)
+    grid_spectro_np[:] = np.nan
+
+    grid_photo_shape   = shape_photo
+    grid_photo_data    = mp.RawArray(ctypes.c_double, int(np.prod(grid_photo_shape)))
+    grid_photo_np      = array_to_numpy(grid_photo_data, grid_photo_shape, float)
+    grid_photo_np[:]   = np.nan
+
+    #
+    # parallel grid adaptation
+    #
+    shape = grid_input_shape[1:]
     pbar = tqdm(total=np.prod(shape), leave=False)
-    for idx in np.ndindex(shape):
+
+    def update(*a):
         pbar.update()
 
-        model_to_adapt = grid_np[(..., ) + idx]
-        nan_mod = np.isnan(model_to_adapt)
-        if np.any(nan_mod):
-            msg = 'Extraction of model failed : '
-            for i, (key, title) in enumerate(zip(attr['key'], attr['title'])):
-                msg += f'{title}={grid[key].values[i]}, '
-            print(msg)
-        else:
-            mod_spectro, mod_photo = adapt_model(global_params, wav_mod_nativ, model_to_adapt,
-                                                 res_mod_obs_merge, obs_name=obs_name, indobs=indobs)
-            grid_spectro_np[(..., ) + idx] = mod_spectro
-            grid_photo_np[(..., ) + idx] = mod_photo
+    if parallel:
+        ncpu = mp.cpu_count() // 2
+        with ThreadPool(processes=ncpu, initializer=tpool_adapt_init, initargs=(grid_input_shape, grid_input_data, grid_spectro_shape, grid_spectro_data, grid_photo_shape, grid_photo_data)) as pool:
+            for idx in np.ndindex(shape):
+                pool.apply_async(tpool_adapt, args=(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, indobs, attr['key'], attr['title'], values), callback=update)
+
+            pool.close()
+            pool.join()
+    else:
+        tpool_adapt_init(grid_input_shape, grid_input_data, grid_spectro_shape, grid_spectro_data, grid_photo_shape, grid_photo_data)
+
+        for idx in np.ndindex(shape):
+            tpool_adapt(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, indobs, attr['key'], attr['title'], values)
+            update()
 
     # create final datasets
     vars = ["wavelength"]
@@ -83,8 +180,9 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
     print('-> The possible holes in the grid are interpolated: ')
     print()
-    for key_ind, key in enumerate(attr['key']):
-        print(str(key_ind+1) + '/' + str(len(attr['key'])))
+    nkey = len(attr['key'])
+    for idx, (key, title) in enumerate(zip(attr['key'], attr['title'])):
+        print(f'{idx+1}/{nkey} - {title}')
         ds_spectro_new = ds_spectro_new.interpolate_na(dim=key, method="linear", fill_value="extrapolate", limit=None, max_gap=None)
         ds_photo_new = ds_photo_new.interpolate_na(dim=key, method="linear", fill_value="extrapolate", limit=None, max_gap=None)
 
