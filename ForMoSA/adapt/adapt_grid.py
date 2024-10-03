@@ -88,7 +88,7 @@ def tpool_adapt(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, 
 
     Author
     ------
-    Arthur Vigan, LAM/CNRS
+    Arthur Vigan
     '''
 
     # global variables
@@ -125,7 +125,7 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     Returns:
         None
 
-    Author: Simon Petrus, Matthieu Ravet and Paulina Palma-Bifani
+    Author: Simon Petrus, Matthieu Ravet, Paulina Palma-Bifani and Arthur Vigan
     """
 
     ds = xr.open_dataset(global_params.model_path, decode_cf=False, engine="netcdf4")
