@@ -199,12 +199,14 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     for key in attr['key']:
         vars.append(key)
 
-    coords = {"wavelength": wav_obs_photo}
+    coords_spectro = {"wavelength": wav_obs_spectro}
+    coords_photo   = {"wavelength": wav_obs_photo}
     for key in attr['key']:
-        coords[key] = grid[key].values
+        coords_spectro[key] = grid[key].values
+        coords_photo[key]   = grid[key].values
 
-    ds_spectro_new = xr.Dataset(data_vars=dict(grid=(vars, grid_spectro_np)), coords=coords, attrs=attr)
-    ds_photo_new   = xr.Dataset(data_vars=dict(grid=(vars, grid_photo_np)), coords=coords, attrs=attr)
+    ds_spectro_new = xr.Dataset(data_vars=dict(grid=(vars, grid_spectro_np)), coords=coords_spectro, attrs=attr)
+    ds_photo_new   = xr.Dataset(data_vars=dict(grid=(vars, grid_photo_np)), coords=coords_photo, attrs=attr)
 
     print()
     print('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
