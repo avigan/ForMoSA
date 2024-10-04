@@ -112,7 +112,7 @@ def tpool_adapt(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, 
         grid_photo[(..., ) + idx]   = mod_photo
 
 
-def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge, obs_name='', indobs=0, parallel=True):
+def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge, obs_name='', indobs=0):
     """
     Adapt the synthetic spectra of a grid to make them comparable with the data.
 
@@ -175,8 +175,8 @@ def adapt_grid(global_params, wav_obs_spectro, wav_obs_photo, res_mod_obs_merge,
     def update(*a):
         pbar.update()
 
-    if parallel:
-        ncpu = mp.cpu_count() // 2
+    if global_params.parallel:
+        ncpu = mp.cpu_count()
         with ThreadPool(processes=ncpu, initializer=tpool_adapt_init, initargs=(grid_input_shape, grid_input_data, grid_spectro_shape, grid_spectro_data, grid_photo_shape, grid_photo_data)) as pool:
             for idx in np.ndindex(shape):
                 pool.apply_async(tpool_adapt, args=(idx, global_params, wav_mod_nativ, res_mod_obs_merge, obs_name, indobs, attr['key'], attr['title'], values), callback=update)
