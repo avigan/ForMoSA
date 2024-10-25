@@ -21,31 +21,6 @@ def yesno(text):
         return yesno()
 
 # ----------------------------------------------------------------------------------------------------------------------
-def diag_mat(rem=[], result=np.empty((0, 0))):
-    '''
-    Function to concatenate and align iterativly block matrices (usefull during the extraction and the inversion).
-
-    Args:
-        rem        (list): matrices to be add iterativly (use diag([mat1, mat2]))
-        result    (array): final array with each sub-matrices aligned allong the diagonal
-    Returns:
-        diag_mat (matrix): Generated diagonal matrix
-        (If rem input is empty, it wull return an empy array)
-
-    Author : Ishigoya, Stack-overflow : https://stackoverflow.com/questions/42154606/python-numpy-how-to-construct-a-big-diagonal-arraymatrix-from-two-small-array
-    '''
-    if not rem:
-        return result
-    m = rem.pop(0)
-    result = np.block(
-        [
-            [result, np.zeros((result.shape[0], m.shape[1]))],
-            [np.zeros((m.shape[0], result.shape[1])), m],
-        ]
-    )
-    return diag_mat(rem, result)
-
-# ----------------------------------------------------------------------------------------------------------------------
 
 
 class GlobFile:
