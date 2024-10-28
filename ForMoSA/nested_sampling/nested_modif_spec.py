@@ -161,7 +161,7 @@ def calc_ck(flx_obs_spectro, err_obs_spectro, flx_mod_spectro, flx_obs_photo, er
     if analytic == 'no':
         r_picked *= u.Rjup
         d_picked *= u.pc
-        ck = alpha * (r_picked.value/d_picked.value)**2
+        ck = alpha * (r_picked.to(u.m).value/d_picked.to(u.m).value)**2
     # Calculation of the dilution factor ck analytically
     else:
         if len(flx_obs_spectro) != 0:
@@ -448,7 +448,7 @@ def modif_spec(global_params, theta, theta_index,
         else: # If you want 1 common rv for all observations
             if global_params.rv != "NA":
                 if global_params.rv[0] == "constant":
-                    alpha_picked = float(global_params.rv[1])
+                    rv_picked = float(global_params.rv[1])
                 else:
                     ind_theta_rv = np.where(theta_index == 'rv')
                     rv_picked = theta[ind_theta_rv[0][0]]

@@ -3,15 +3,13 @@ from __future__ import print_function, division
 import os, glob, sys
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
 from scipy.interpolate import interp1d
 import corner
 import xarray as xr
 import pickle
-from tqdm import tqdm
+import astropy.constants as cst
 
 sys.path.insert(0, os.path.abspath('../'))
-import scipy.signal as sg
 
 # Import ForMoSA
 from main_utilities import GlobFile
@@ -273,7 +271,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[2][1] + fr'$_{indobs}$' + ' ' + extra_parameters[2][2])
                     theta_index.append(f'alpha_{indobs}')
         else: # If you want 1 common alpha for all observations
-            if self.global_params.alpha != 'NA' and self.global_params.alpha != 'constant':
+            if self.global_params.alpha != 'NA' and self.global_params.alpha[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[2][1] + ' ' + extra_parameters[2][2])
                 theta_index.append('alpha')
         if len(self.global_params.rv) > 3: # If you want separate rv for each observations
@@ -283,7 +281,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[3][1] + fr'$_{indobs}$' + ' ' + extra_parameters[3][2])
                     theta_index.append(f'rv_{indobs}')
         else: # If you want 1 common rv for all observations
-            if self.global_params.rv != 'NA' and self.global_params.rv != 'constant':
+            if self.global_params.rv != 'NA' and self.global_params.rv[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[3][1] + ' ' + extra_parameters[3][2])
                 theta_index.append('rv')
         if len(self.global_params.vsini) > 4: # If you want separate vsini for each observations
@@ -293,7 +291,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[5][1] + fr'$_{indobs}$' + ' ' + extra_parameters[5][2])
                     theta_index.append(f'vsini_{indobs}')
         else: # If you want 1 common vsini for all observations
-            if self.global_params.vsini != 'NA' and self.global_params.vsini != 'constant':
+            if self.global_params.vsini != 'NA' and self.global_params.vsini[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[5][1] + ' ' + extra_parameters[5][2])
                 theta_index.append('vsini')
         if len(self.global_params.ld) > 3: # If you want separate ld for each observations
@@ -303,7 +301,7 @@ class PlottingForMoSA():
                     tot_list_param_title.append(extra_parameters[6][1] + fr'$_{indobs}$' + ' ' + extra_parameters[6][2])
                     theta_index.append(f'ld_{indobs}')
         else: # If you want 1 common vsini for all observations
-            if self.global_params.ld != 'NA' and self.global_params.ld != 'constant':
+            if self.global_params.ld != 'NA' and self.global_params.ld[0] != 'constant':
                 tot_list_param_title.append(extra_parameters[6][1] + ' ' + extra_parameters[6][2])
                 theta_index.append('ld')
 
@@ -330,10 +328,8 @@ class PlottingForMoSA():
                 ind_theta_r = np.where(self.theta_index == 'r')
                 r_picked = results[ind_theta_r[0]]
                 
-                lum = np.log10(4 * np.pi * (r_picked * 69911000.) ** 2 * results[0] ** 4 * 5.670e-8 / 3.83e26)
-                #print(lum)
+                lum = np.log10(4 * np.pi * (r_picked * cst.R_jup.value) ** 2 * results[0] ** 4 * cst.sigma_sb.value / cst.L_sun.value)
                 results = np.concatenate((results, np.asarray(lum)))
-                #print(results)
                 posterior_to_plot.append(results)
 
         self.posterior_to_plot = np.array(posterior_to_plot)
@@ -355,9 +351,10 @@ class PlottingForMoSA():
         print('ForMoSA - Corner plot')
 
         self._get_posteriors()
+        
 
         fig = corner.corner(self.posterior_to_plot[burn_in:],
-                            #weights=self.weights[burn_in:],
+                            weights=self.weights[burn_in:],
                             labels=self.posteriors_names,
                             range=[0.999999 for p in self.posteriors_names],
                             levels=levels_sig,
@@ -484,12 +481,12 @@ class PlottingForMoSA():
             obs_name = os.path.splitext(os.path.basename(self.global_params.observation_path))[0]
 
             spectrum_obs = np.load(os.path.join(self.global_params.result_path, f'spectrum_obs_{obs_name}.npz'), allow_pickle=True)
-            wav_obs_spectro = np.asarray(spectrum_obs['obs_spectro_merge'][0], dtype=float)
-            flx_obs_spectro = np.asarray(spectrum_obs['obs_spectro_merge'][1], dtype=float)
-            err_obs_spectro = np.asarray(spectrum_obs['obs_spectro_merge'][2], dtype=float)
-            transm_obs = np.asarray(spectrum_obs['obs_opt_merge'][1], dtype=float)
-            star_flx_obs = np.asarray(spectrum_obs['obs_opt_merge'][2], dtype=float)
-            system_obs = np.asarray(spectrum_obs['obs_opt_merge'][3], dtype=float)
+            wav_obs_spectro = np.asarray(spectrum_obs['obs_spectro'][0], dtype=float)
+            flx_obs_spectro = np.asarray(spectrum_obs['obs_spectro'][1], dtype=float)
+            err_obs_spectro = np.asarray(spectrum_obs['obs_spectro'][2], dtype=float)
+            transm_obs = np.asarray(spectrum_obs['obs_opt'][1], dtype=float)
+            star_flx_obs = np.asarray(spectrum_obs['obs_opt'][2], dtype=float)
+            system_obs = np.asarray(spectrum_obs['obs_opt'][3], dtype=float)
             if 'obs_photo' in spectrum_obs.keys():
                 wav_obs_photo = np.asarray(spectrum_obs['obs_photo'][0], dtype=float)
                 flx_obs_photo = np.asarray(spectrum_obs['obs_photo'][1], dtype=float)

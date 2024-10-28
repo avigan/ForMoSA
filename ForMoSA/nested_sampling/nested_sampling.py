@@ -11,7 +11,6 @@ sys.path.insert(0, os.path.abspath('../'))
 from nested_sampling.nested_modif_spec import modif_spec
 from nested_sampling.nested_prior_function import uniform_prior, gaussian_prior
 from nested_sampling.nested_logL_functions import *
-from main_utilities import diag_mat
 
 
 def import_obsmod(global_params):
@@ -19,11 +18,11 @@ def import_obsmod(global_params):
     Function to import spectra (model and data) before the inversion
 
     Args:
-        global_params  (object): Class containing every input from the .ini file.
+        global_params    (object): Class containing every input from the .ini file.
         
     Returns:
         - main_file (list(array)): Return a list of lists with the wavelengths, flux, errors, covariance matrix,
-                                transmission, star flux, systematics and the grids for both spectroscopic and photometric data. 
+                                transmission, star flux, systematics, grid indices and the grids for both spectroscopic and photometric data. 
 
     Authors: Simon Petrus, Matthieu Ravet and Allan Denis
     """
@@ -37,14 +36,14 @@ def import_obsmod(global_params):
         obs_name = os.path.splitext(os.path.basename(global_params.observation_path))[0]
         spectrum_obs = np.load(os.path.join(global_params.result_path, f'spectrum_obs_{obs_name}.npz'), allow_pickle=True)
 
-        wav_obs_spectro = np.asarray(spectrum_obs['obs_spectro_merge'][0], dtype=float)
-        flx_obs_spectro = np.asarray(spectrum_obs['obs_spectro_merge'][1], dtype=float)
-        err_obs_spectro = np.asarray(spectrum_obs['obs_spectro_merge'][2], dtype=float)
+        wav_obs_spectro = np.asarray(spectrum_obs['obs_spectro'][0], dtype=float)
+        flx_obs_spectro = np.asarray(spectrum_obs['obs_spectro'][1], dtype=float)
+        err_obs_spectro = np.asarray(spectrum_obs['obs_spectro'][2], dtype=float)
         # Optional arrays
-        inv_cov_obs = np.asarray(spectrum_obs['obs_opt_merge'][0], dtype=float)
-        transm_obs = np.asarray(spectrum_obs['obs_opt_merge'][1], dtype=float)
-        star_flx_obs = np.asarray(spectrum_obs['obs_opt_merge'][2], dtype=float)
-        system_obs = np.asarray(spectrum_obs['obs_opt_merge'][3], dtype=float)
+        inv_cov_obs = np.asarray(spectrum_obs['obs_opt'][0], dtype=float)
+        transm_obs = np.asarray(spectrum_obs['obs_opt'][1], dtype=float)
+        star_flx_obs = np.asarray(spectrum_obs['obs_opt'][2], dtype=float)
+        system_obs = np.asarray(spectrum_obs['obs_opt'][3], dtype=float)
 
         if 'obs_photo' in spectrum_obs.keys():
             wav_obs_photo = np.asarray(spectrum_obs['obs_photo'][0], dtype=float)
@@ -64,9 +63,58 @@ def import_obsmod(global_params):
         ds = xr.open_dataset(path_grid_photo, decode_cf=False, engine='netcdf4')
         grid_photo = ds['grid']
         ds.close()
-        
 
-        main_file.append([[wav_obs_spectro, wav_obs_photo], [flx_obs_spectro, flx_obs_photo], [err_obs_spectro, err_obs_photo], inv_cov_obs, transm_obs, star_flx_obs, system_obs, grid_spectro, grid_photo])
+        # Initiate indices tables for each sub-spectrum
+        mask_mod_spectro = np.zeros(len(grid_spectro['wavelength']), dtype=bool)
+        mask_mod_photo = np.zeros(len(grid_photo['wavelength']), dtype=bool)
+        mask_obs_spectro = np.zeros(len(wav_obs_spectro), dtype=bool)
+        mask_obs_photo = np.zeros(len(wav_obs_photo), dtype=bool)     
+        for ns_u_ind, ns_u in enumerate(global_params.wav_fit[indobs].split('/')):
+            min_ns_u = float(ns_u.split(',')[0])
+            max_ns_u = float(ns_u.split(',')[1])
+            # Indices of each model and data
+            mask_mod_spectro += (grid_spectro['wavelength'] >= min_ns_u) & (grid_spectro['wavelength'] <= max_ns_u)
+            mask_mod_photo += (grid_photo['wavelength'] >= min_ns_u) & (grid_photo['wavelength'] <= max_ns_u)
+            mask_obs_spectro += (wav_obs_spectro >= min_ns_u) & (wav_obs_spectro <= max_ns_u)
+            mask_obs_photo += (wav_obs_photo >= min_ns_u) & (wav_obs_photo <= max_ns_u)
+
+        # Cutting the data to a wavelength grid defined by the parameter 'wav_fit'
+        wav_obs_spectro_ns_u = wav_obs_spectro[mask_obs_spectro]
+        flx_obs_spectro_ns_u = flx_obs_spectro[mask_obs_spectro]
+        err_obs_spectro_ns_u = err_obs_spectro[mask_obs_spectro]
+        if len(inv_cov_obs) != 0:  # Add covariance in the loop (if necessary)
+            inv_cov_obs_ns_u = inv_cov_obs[np.ix_(mask_obs_spectro, mask_obs_spectro)]
+        else:
+            inv_cov_obs_ns_u = np.asarray([])
+        if len(transm_obs) != 0: # Add the transmission (if necessary)
+            transm_obs_ns_u = transm_obs[mask_obs_spectro]
+        else:
+            transm_obs_ns_u = np.asarray([])
+        if len(star_flx_obs) != 0: # Add star flux (if necessary)
+            star_flx_obs_ns_u = star_flx_obs[mask_obs_spectro]
+        else:
+            star_flx_obs_ns_u = np.asarray([])
+        if len(system_obs) != 0: # Add systematics model (if necessary)
+            system_obs_ns_u = system_obs[mask_obs_spectro]
+        else:
+            system_obs_ns_u = np.asarray([])
+        wav_obs_photo_ns_u = wav_obs_photo[mask_obs_photo]
+        flx_obs_photo_ns_u = flx_obs_photo[mask_obs_photo]
+        err_obs_photo_ns_u = err_obs_photo[mask_obs_photo]
+
+        # Cutting of the grid on the wavelength grid defined by the parameter 'wav_fit'
+        grid_spectro_ns_u = grid_spectro.sel(wavelength=grid_spectro['wavelength'][mask_mod_spectro])
+        grid_photo_ns_u = grid_photo.sel(wavelength=grid_photo['wavelength'][mask_mod_photo])
+        
+        main_file.append([[wav_obs_spectro_ns_u, wav_obs_photo_ns_u],
+                          [flx_obs_spectro_ns_u, flx_obs_photo_ns_u],
+                          [err_obs_spectro_ns_u, err_obs_photo_ns_u],
+                          inv_cov_obs_ns_u,
+                          transm_obs_ns_u,
+                          star_flx_obs_ns_u,
+                          system_obs_ns_u,
+                          grid_spectro_ns_u,
+                          grid_photo_ns_u])
 
     return main_file
 
@@ -98,129 +146,68 @@ def loglike(theta, theta_index, global_params, main_file, for_plot='no'):
     for indobs, obs in enumerate(sorted(glob.glob(main_obs_path))):
         
         # Recovery of spectroscopy and photometry data
-        wav_obs_spectro = main_file[indobs][0][0]
-        wav_obs_photo = main_file[indobs][0][1]
-        flx_obs_spectro = main_file[indobs][1][0]
-        flx_obs_photo = main_file[indobs][1][1]
-        err_obs_spectro = main_file[indobs][2][0]
-        err_obs_photo = main_file[indobs][2][1]
-        inv_cov_obs = main_file[indobs][3]
-        transm_obs = main_file[indobs][4]
-        star_flx_obs = main_file[indobs][5]
-        system_obs = main_file[indobs][6]
-        
+        wav_obs_spectro_ns_u = main_file[indobs][0][0]
+        wav_obs_photo_ns_u = main_file[indobs][0][1]
+        flx_obs_spectro_ns_u = main_file[indobs][1][0]
+        flx_obs_photo_ns_u = main_file[indobs][1][1]
+        err_obs_spectro_ns_u = main_file[indobs][2][0]
+        err_obs_photo_ns_u = main_file[indobs][2][1]
+        inv_cov_obs_ns_u = main_file[indobs][3]
+        transm_obs_ns_u = main_file[indobs][4]
+        star_flx_obs_ns_u = main_file[indobs][5]
+        system_obs_ns_u = main_file[indobs][6]
         
         # Recovery of the spectroscopy and photometry model
-        grid_spectro = main_file[indobs][7]
-        grid_photo = main_file[indobs][8]
+        grid_spectro_ns_u = main_file[indobs][7]
+        grid_photo_ns_u = main_file[indobs][8] 
 
-        # Calculation of the likelihood for each sub-spectrum defined by the parameter 'wav_fit'
-        for ns_u_ind, ns_u in enumerate(global_params.wav_fit[indobs].split('/')):
-            
-            min_ns_u = float(ns_u.split(',')[0])
-            max_ns_u = float(ns_u.split(',')[1])
-            ind_grid_spectro_sel = np.where((grid_spectro['wavelength'] >= min_ns_u) & (grid_spectro['wavelength'] <= max_ns_u))
-            ind_grid_photo_sel = np.where((grid_photo['wavelength'] >= min_ns_u) & (grid_photo['wavelength'] <= max_ns_u))
-
-            # Cutting of the grid on the wavelength grid defined by the parameter 'wav_fit'
-            grid_spectro_cut = grid_spectro.sel(wavelength=grid_spectro['wavelength'][ind_grid_spectro_sel])
-            grid_photo_cut = grid_photo.sel(wavelength=grid_photo['wavelength'][ind_grid_photo_sel])
-
-            # Interpolation of the grid at the theta parameters set
-            if global_params.par3 == 'NA':
-                if len(grid_spectro_cut['wavelength']) != 0:
-                    flx_mod_spectro_cut = np.asarray(grid_spectro_cut.interp(par1=theta[0], par2=theta[1],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_spectro_cut = np.asarray([])
-                if len(grid_photo_cut['wavelength']) != 0:
-                    flx_mod_photo_cut = np.asarray(grid_photo_cut.interp(par1=theta[0], par2=theta[1],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_photo_cut = np.asarray([])
-            elif global_params.par4 == 'NA':
-                if len(grid_spectro_cut['wavelength']) != 0:
-                    flx_mod_spectro_cut = np.asarray(grid_spectro_cut.interp(par1=theta[0], par2=theta[1], par3=theta[2],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_spectro_cut = np.asarray([])
-                if len(grid_photo_cut['wavelength']) != 0:
-                    flx_mod_photo_cut = np.asarray(grid_photo_cut.interp(par1=theta[0], par2=theta[1], par3=theta[2],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_photo_cut = np.asarray([])
-            elif global_params.par5 == 'NA':
-                if len(grid_spectro_cut['wavelength']) != 0:
-                    flx_mod_spectro_cut = np.asarray(grid_spectro_cut.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_spectro_cut = np.asarray([])
-                if len(grid_photo_cut['wavelength']) != 0:
-                    flx_mod_photo_cut = np.asarray(grid_photo_cut.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_photo_cut = np.asarray([])
+        # Interpolation of the grid at the theta parameters set
+        if global_params.par3 == 'NA':
+            if len(grid_spectro_ns_u['wavelength']) != 0:
+                flx_mod_spectro_ns_u = np.asarray(grid_spectro_ns_u.interp(par1=theta[0], par2=theta[1],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
             else:
-                if len(grid_spectro_cut['wavelength']) != 0:
-                    flx_mod_spectro_cut = np.asarray(grid_spectro_cut.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
-                                                            par5=theta[4],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_spectro_cut = np.asarray([])
-                if len(grid_photo_cut['wavelength']) != 0:
-                    flx_mod_photo_cut = np.asarray(grid_photo_cut.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
-                                                            par5=theta[4],
-                                                            method="linear", kwargs={"fill_value": "extrapolate"}))
-                else:
-                    flx_mod_photo_cut = np.asarray([])
-
-
-            # Re-merging of the data and interpolated synthetic spectrum to a wavelength grid defined by the parameter 'wav_fit'
-            ind_spectro = np.where((wav_obs_spectro >= min_ns_u) & (wav_obs_spectro <= max_ns_u))
-            ind_photo = np.where((wav_obs_photo >= min_ns_u) & (wav_obs_photo <= max_ns_u))
-            if ns_u_ind == 0:
-                wav_obs_spectro_ns_u = wav_obs_spectro[ind_spectro]
-                flx_obs_spectro_ns_u = flx_obs_spectro[ind_spectro]
-                err_obs_spectro_ns_u = err_obs_spectro[ind_spectro]
-                flx_mod_spectro_ns_u = flx_mod_spectro_cut
-                if len(inv_cov_obs) != 0:  # Add covariance in the loop (if necessary)
-                    inv_cov_obs_ns_u = inv_cov_obs[np.ix_(ind_spectro[0],ind_spectro[0])]
-                else:
-                    inv_cov_obs_ns_u = np.asarray([])
-                if len(transm_obs) != 0: # Add the transmission (if necessary)
-                    transm_obs_ns_u = transm_obs[ind_spectro]
-                else:
-                    transm_obs_ns_u = np.asarray([])
-                if len(star_flx_obs) != 0: # Add star flux (if necessary)
-                    star_flx_obs_ns_u = star_flx_obs[ind_spectro]
-                else:
-                    star_flx_obs_ns_u = np.asarray([])
-                if len(system_obs) != 0: # Add systematics model (if necessary)
-                    system_obs_ns_u = system_obs[ind_spectro]
-                else:
-                    system_obs_ns_u = np.asarray([])
-                wav_obs_photo_ns_u = wav_obs_photo[ind_photo]
-                flx_obs_photo_ns_u = flx_obs_photo[ind_photo]
-                err_obs_photo_ns_u = err_obs_photo[ind_photo]
-                flx_mod_photo_ns_u = flx_mod_photo_cut
+                flx_mod_spectro_ns_u = np.asarray([])
+            if len(grid_photo_ns_u['wavelength']) != 0:
+                flx_mod_photo_ns_u = np.asarray(grid_photo_ns_u.interp(par1=theta[0], par2=theta[1],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
             else:
-                wav_obs_spectro_ns_u = np.concatenate((wav_obs_spectro_ns_u, wav_obs_spectro[ind_spectro]))
-                flx_obs_spectro_ns_u = np.concatenate((flx_obs_spectro_ns_u, flx_obs_spectro[ind_spectro]))
-                err_obs_spectro_ns_u = np.concatenate((err_obs_spectro_ns_u, err_obs_spectro[ind_spectro]))
-                flx_mod_spectro_ns_u = np.concatenate((flx_mod_spectro_ns_u, flx_mod_spectro_cut))
-                if len(inv_cov_obs_ns_u) != 0: # Merge the covariance matrices (if necessary)
-                    inv_cov_obs_ns_u = diag_mat([inv_cov_obs_ns_u, inv_cov_obs[np.ix_(ind_spectro[0],ind_spectro[0])]])
-                if len(transm_obs_ns_u) != 0: # Merge the transmissions (if necessary)
-                    transm_obs_ns_u = np.concatenate((transm_obs_ns_u, transm_obs[ind_spectro]))
-                if len(star_flx_obs_ns_u) != 0: # Merge star fluxes (if necessary)
-                    star_flx_obs_ns_u = np.concatenate((star_flx_obs_ns_u, star_flx_obs[ind_grid_spectro_sel]),axis=0)
-                if len(system_obs) != 0: # Merge systematics model (if necessary)
-                    system_obs_ns_u = np.concatenate((system_obs_ns_u, system_obs[ind_grid_spectro_sel]), axis=0)
-                wav_obs_photo_ns_u = np.concatenate((wav_obs_photo_ns_u, wav_obs_photo[ind_photo]))
-                flx_obs_photo_ns_u = np.concatenate((flx_obs_photo_ns_u, flx_obs_photo[ind_photo]))
-                err_obs_photo_ns_u = np.concatenate((err_obs_photo_ns_u, err_obs_photo[ind_photo]))
-                flx_mod_photo_ns_u = np.concatenate((flx_mod_photo_ns_u, flx_mod_photo_cut))
-
+                flx_mod_photo_ns_u = np.asarray([])
+        elif global_params.par4 == 'NA':
+            if len(grid_spectro_ns_u['wavelength']) != 0:
+                flx_mod_spectro_ns_u = np.asarray(grid_spectro_ns_u.interp(par1=theta[0], par2=theta[1], par3=theta[2],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
+            else:
+                flx_mod_spectro_ns_u = np.asarray([])
+            if len(grid_photo_ns_u['wavelength']) != 0:
+                flx_mod_photo_ns_u = np.asarray(grid_photo_ns_u.interp(par1=theta[0], par2=theta[1], par3=theta[2],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
+            else:
+                flx_mod_photo_ns_u = np.asarray([])
+        elif global_params.par5 == 'NA':
+            if len(grid_spectro_ns_u['wavelength']) != 0:
+                flx_mod_spectro_ns_u = np.asarray(grid_spectro_ns_u.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
+            else:
+                flx_mod_spectro_ns_u = np.asarray([])
+            if len(grid_photo_ns_u['wavelength']) != 0:
+                flx_mod_photo_ns_u = np.asarray(grid_photo_ns_u.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
+            else:
+                flx_mod_photo_ns_u = np.asarray([])
+        else:
+            if len(grid_spectro_ns_u['wavelength']) != 0:
+                flx_mod_spectro_ns_u = np.asarray(grid_spectro_ns_u.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
+                                                        par5=theta[4],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
+            else:
+                flx_mod_spectro_ns_u = np.asarray([])
+            if len(grid_photo_ns_u['wavelength']) != 0:
+                flx_mod_photo_ns_u = np.asarray(grid_photo_ns_u.interp(par1=theta[0], par2=theta[1], par3=theta[2], par4=theta[3],
+                                                        par5=theta[4],
+                                                        method="linear", kwargs={"fill_value": "extrapolate"}))
+            else:
+                flx_mod_photo_ns_u = np.asarray([])
 
         # Modification of the synthetic spectrum with the extra-grid parameters
         modif_spec_LL = modif_spec(global_params, theta, theta_index,

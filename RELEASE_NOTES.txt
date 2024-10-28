@@ -389,5 +389,54 @@ Comments:
       - New approach in the adaptation of the data in the case where the user defined separated windows in 'wave_for_adapt' (eg : '1.4, 1.5 / 1.6, 1.7 / 1.8, 1.9 / ... '). Instead of making a loop on each sub-interval, we now combine the data in one array and do the adaptation on one array
       - New approach in the lsq function, we can now use the lsq in each sub wavelength separatly (eg. '1.4, 1.5', '1.6, 1.7', '1.8, 1.9' ...) and merge the results into a single array to compute the loglikelihood on one array only. This gives the advantage of limiting flux error calibration that can arrise between order for data such as CRIRES, HiRISE ... and being fast at the same time. Previously, the use had to define separated windows in 'wave_fit' (eg : '1.4, 1.5', '1.6, 1.7', '1.8, 1.9' ...) and one loglikelihood one computed for each of these windows. Now the user has to define separated windows in the format '1.4, 1.5 / 1.6, 1.7 / 1.8, 1.9 / ...' 
       
-Tests tha have been done to checkup the changes:
+Tests that have been done to checkup the changes:
      - High resolution datasets (HiRISE, CRIRES)
+
+
+- - -
+
+26/09/2024
+
+Matthieu Ravet
+
+Comments:
+      - Updating / correting the readthedocs
+      - Correction of the rv input loop if you want to set it to constant during the ns
+      - Correction of the plotting function (for constant extra grid and for the custom resolution grid)
+      
+
+Tests that have been done to checkup the changes:
+     - Test with constant priors on the rv
+
+
+_ _ _ 
+
+25/10/2024
+
+Matthieu Ravet
+
+Comments:
+    Huge optimisation and correction update with multiple changes
+
+    In extraction_functions / adapt_obs_mod and adapt_grid :
+    - Updating the import name of STAR FLX to STAR_FLX1 to match what is done for SYSTEM1 (i.e. when only one is used)
+    - Updating the extraction of the covariance matrix (to extract off-diagonal terms if multiple wav_for_adapt)
+    - Separated spectral obs are not stored separatly anymore (not needed)
+    - Spectral instrument are not stored anymore (not needed)
+    - Removing the step np.load() during the adapation of the grid to speed up the code
+    - Correcting the convolution function : removing factor 2 in fwhm = 2 * wav / res and reseting num_sigma = 1
+    - Updating function names in adapt_grid
+
+    In nested_sampling
+    - Extraction the loop on each spectral window out of the inversion loop to speed up the code
+    - Updating the extraction of the covariance matrix (to extract off-diagonal terms if multiple wav_fit)
+
+    In plotting_class
+    - Updating the function according to the previous changes
+    - Updating to use astropy units to compute the Luminosity
+
+Tests that have been done to checkup the changes:
+     - Run with photometry / LRS / MRS and HRS
+     - Run with/without MOSAIC
+     - Run with/without multiple wav_for_adapt and multiple wav_fit
+     - Run with/without continuum 

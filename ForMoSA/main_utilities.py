@@ -21,37 +21,12 @@ def yesno(text):
         return yesno()
 
 # ----------------------------------------------------------------------------------------------------------------------
-def diag_mat(rem=[], result=np.empty((0, 0))):
-    '''
-    Function to concatenate and align iterativly block matrices (usefull during the extraction and the inversion).
-
-    Args:
-        rem        (list): matrices to be add iterativly (use diag([mat1, mat2]))
-        result    (array): final array with each sub-matrices aligned allong the diagonal
-    Returns:
-        diag_mat (matrix): Generated diagonal matrix
-        (If rem input is empty, it wull return an empy array)
-
-    Author : Ishigoya, Stack-overflow : https://stackoverflow.com/questions/42154606/python-numpy-how-to-construct-a-big-diagonal-arraymatrix-from-two-small-array
-    '''
-    if not rem:
-        return result
-    m = rem.pop(0)
-    result = np.block(
-        [
-            [result, np.zeros((result.shape[0], m.shape[1]))],
-            [np.zeros((m.shape[0], result.shape[1])), m],
-        ]
-    )
-    return diag_mat(rem, result)
-
-# ----------------------------------------------------------------------------------------------------------------------
 
 
 class GlobFile:
     '''
     Class that import all the parameters from the config file and make them GLOBAL FORMOSA VARIABLES.
-    
+
     Author: Paulina Palma-Bifani
     '''
 
@@ -76,7 +51,7 @@ class GlobFile:
         model_name = model_name[0]
         self.model_name = model_name
 
-        if type(config['config_adapt']['wav_for_adapt']) != list: # Create lists if only one obs in the loop 
+        if type(config['config_adapt']['wav_for_adapt']) != list: # Create lists if only one obs in the loop
             # [config_adapt] (5)
             self.wav_for_adapt = [config['config_adapt']['wav_for_adapt']]
             self.adapt_method = [config['config_adapt']['adapt_method']]
@@ -101,6 +76,12 @@ class GlobFile:
             self.logL_type = config['config_inversion']['logL_type']
             self.wav_fit = config['config_inversion']['wav_fit']
 
+        # parallelisation of adapt
+        try:
+            self.parallel = config['config_adapt']['parallel']
+        except KeyError:
+            self.parallel = False
+
         self.ns_algo = config['config_inversion']['ns_algo']
         self.npoint = config['config_inversion']['npoint']
 
@@ -121,7 +102,7 @@ class GlobFile:
         self.bb_R = config['config_parameter']['bb_R']
 
         self.ck = None
-        
+
         # [config_nestle] (5, some mutually exclusive)  (n_ prefix for params)
         self.n_method = config['config_nestle']['method']
         self.n_maxiter = eval(config['config_nestle']['maxiter'])
@@ -152,7 +133,7 @@ class GlobFile:
         # self.p_init_MPI = config['config_pymultinest']['init_MPI']
         # self.p_dump_callback = config['config_pymultinest']['dump_callback']
         # self.p_use_MPI = config['config_pymultinest']['use_MPI']
-        
+
         # [config_dinesty] & [config_ultranest] CHECK THIS
 
         # ## create OUTPUTS Sub-Directories: interpolated grids and results
