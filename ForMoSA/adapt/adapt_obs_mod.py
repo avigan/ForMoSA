@@ -32,11 +32,11 @@ def launch_adapt(global_params, justobs='no'):
     res_mod_nativ = attr['res']
     ds.close()
 
-    # Check if the spectrum is Nyquist-sampled, else set the resolution to R = wav / 2 Deltawav
+    # Check if the grid is Nyquist-sampled, else set the resolution to R = wav / 2 Deltawav to make sure we are adding any info
     dwav = np.abs(wav_mod_nativ - np.roll(wav_mod_nativ, 1))
     dwav[0] = dwav[1]
     res_Nyquist = wav_mod_nativ / (2 * dwav)
-    res_mod_nativ[np.where(res_mod_nativ > res_Nyquist)] = res_Nyquist[np.where(res_mod_nativ > res_Nyquist)]
+    res_mod_nativ[(res_mod_nativ > res_Nyquist)] = res_Nyquist[(res_mod_nativ > res_Nyquist)]
 
     # Extract the data from the observation files
     main_obs_path = global_params.main_observation_path

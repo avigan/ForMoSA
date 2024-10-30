@@ -203,12 +203,6 @@ def adapt_observation_range(global_params, obs_name='', indobs=0):
             star_flx = np.delete(star_flx, np.where(~nan_mod_ind), axis=0)
         if len(system) != 0:
             system = np.delete(system, np.where(~nan_mod_ind), axis=0)
-
-        # Check if the spectrum is Nyquist-sampled, else set the resolution to R = wav / 2 Deltawav
-        dwav = np.abs(wav - np.roll(wav, 1))
-        dwav[0] = dwav[1]
-        res_Nyquist = wav / (2 * dwav)
-        res[np.where(res > res_Nyquist)] = res_Nyquist[np.where(res > res_Nyquist)]
             
         # - - - - - - - - - 
 
