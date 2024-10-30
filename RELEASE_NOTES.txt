@@ -440,3 +440,17 @@ Tests that have been done to checkup the changes:
      - Run with/without MOSAIC
      - Run with/without multiple wav_for_adapt and multiple wav_fit
      - Run with/without continuum 
+
+    
+
+_ _ _ 
+
+30/10/2024
+
+Matthieu Ravet
+
+Comments:
+    - Removing the Nyquist checkup for the data (HRS tends to have jumps inside orders which creates weird
+    artefacts during inversion)
+    - Adding new parameter in convolve_and_sample to give back an interpolated version of the model when its 
+    resolution is lower than that of the data

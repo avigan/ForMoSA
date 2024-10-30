@@ -368,7 +368,7 @@ def extract_model(global_params, wav_mod_nativ, flx_mod_nativ, res_mod_obs, wav_
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def convolve_and_sample(wv_channels, sigmas_wvs, model_wvs, model_fluxes, num_sigma=3): # num_sigma = 3 is a good compromise between sampling enough the gaussian and fast interpolation
+def convolve_and_sample(wv_channels, sigmas_wvs, model_wvs, model_fluxes, num_sigma=3, force_int=False): # num_sigma = 3 is a good compromise between sampling enough the gaussian and fast interpolation
     """
     Simulate the observations of a model. Convolves the model with a variable Gaussian LSF, sampled at each desired
     spectral channel.
@@ -379,6 +379,7 @@ def convolve_and_sample(wv_channels, sigmas_wvs, model_wvs, model_fluxes, num_si
         model_wvs          (array): the wavelengths of the model 
         model_fluxes       (array): the fluxes of the model 
         num_sigma          (float): number of +/- sigmas to evaluate the LSF to.
+        force_int         (bolean): False by default. If True, will force interpolation onto wv_channels when the kernel is singular
     Returns:
         - output_model     (array): the fluxes in each of the wavelength channels 
 
@@ -404,8 +405,11 @@ def convolve_and_sample(wv_channels, sigmas_wvs, model_wvs, model_fluxes, num_si
 
         output_model = np.nansum(filter_model * lsf, axis=1) / np.sum(lsf, axis=1)
     else:
-
-        output_model = model_fluxes
+        if force_int == True:
+            model_interp = interp1d(model_wvs, model_fluxes, kind='cubic', bounds_error=False)
+            output_model = model_interp(wv_channels)            
+        else:
+            output_model = model_fluxes
 
     return output_model
 
@@ -456,7 +460,7 @@ def resolution_decreasing(global_params, wav_obs, flx_obs, res_obs, wav_mod_nati
     else:
         fwhm_conv = np.sqrt(max_fwhm ** 2 - fwhm_mod ** 2)
         sigma_conv = fwhm_conv / 2.355
-        flx_obs_final = convolve_and_sample(wav_obs, sigma_conv, wav_mod_nativ, flx_mod_nativ)
+        flx_obs_final = convolve_and_sample(wav_obs, sigma_conv, wav_mod_nativ, flx_mod_nativ, force_int=True)
 
     return flx_obs_final
 
